@@ -14,6 +14,96 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 export const About = () => {
     const containerRef = useRef<HTMLElement>(null);
 
+    useGSAP(
+        () => {
+            if (!containerRef.current) return;
+
+            const scrollSections =
+                containerRef.current.querySelectorAll(".scroll-section");
+
+            scrollSections.forEach((section) => {
+                const wrapper = section.querySelector(".wrapper");
+                if (!wrapper) return;
+
+                const items = wrapper.querySelectorAll(".item");
+                if (items.length === 0) return;
+
+                // Determine direction
+                let direction: "vertical" | "horizontal" | null = null;
+
+                if (section.classList.contains("vertical-section")) {
+                    direction = "vertical";
+                } else if (section.classList.contains("horizontal-section")) {
+                    direction = "horizontal";
+                }
+
+                if (direction) {
+                    initScroll(section as HTMLElement, items, direction);
+                }
+            });
+
+            function initScroll(
+                section: HTMLElement,
+                items: NodeListOf<Element>,
+                direction: "vertical" | "horizontal"
+            ) {
+                // Set initial states for all items except the first
+                items.forEach((item, index) => {
+                    if (index !== 0) {
+                        gsap.set(item, {
+                            [direction === "horizontal"
+                                ? "xPercent"
+                                : "yPercent"]: 100,
+                        });
+                    }
+                });
+
+                // Create timeline with ScrollTrigger
+                const timeline = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: section,
+                        pin: true,
+                        start: "top top",
+                        end: () => `+=${items.length * 100}%`,
+                        scrub: 1,
+                        invalidateOnRefresh: true,
+                    },
+                    defaults: {
+                        ease: "none",
+                    },
+                });
+
+                // Animate each item
+                items.forEach((item, index) => {
+                    // Scale down current item
+                    timeline.to(item, {
+                        scale: 0.9,
+                        borderRadius: "10px",
+                    });
+
+                    // Slide in next item (if it exists)
+                    if (items[index + 1]) {
+                        timeline.to(
+                            items[index + 1],
+                            {
+                                [direction === "horizontal"
+                                    ? "xPercent"
+                                    : "yPercent"]: 0,
+                            },
+                            "<" // Start at the same time as previous animation
+                        );
+                    }
+                });
+            }
+
+            // Cleanup function
+            return () => {
+                ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+            };
+        },
+        { scope: containerRef }
+    );
+
     return (
         <section ref={containerRef} className="bg-white">
             <div>
