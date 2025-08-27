@@ -23,7 +23,7 @@ const StayTuned: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="absolute w-[95%] bottom-5 left-1/2 -translate-x-1/2 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 px-2 md:px-4 py-2 text-sm sm:text-base">
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-[95%] flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 px-2 md:px-4 py-2 text-sm sm:text-base">
         {/* Left Links */}
         <div className="flex gap-3 md:gap-5 flex-wrap justify-center">
           {["FaceBook", "Instagram"].map((link) => (
