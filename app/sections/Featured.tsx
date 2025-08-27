@@ -7,8 +7,8 @@ const Featured = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const sliderRef = useRef(null);
-    const autoPlayRef = useRef(null);
+    const sliderRef = useRef<HTMLDivElement>(null);
+    const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
     const cursorRef = useRef(null);
 
     const newsData = [
@@ -74,8 +74,21 @@ const Featured = () => {
         },
     ];
 
-    // Function to create a slide dynamically
-    const createSlide = (news, index, isNew = false) => {
+    const createSlide = (
+        news: {
+            id: number;
+            category: string;
+            title: string;
+            subtitle: string;
+            excerpt: string;
+            author: string;
+            date: string;
+            readTime: string;
+            image: string;
+        },
+        index: number,
+        isNew = false
+    ) => {
         const slide = document.createElement("div");
         slide.className = `absolute inset-0 ${
             isNew
@@ -206,22 +219,32 @@ const Featured = () => {
 
     // Mouse tracking for parallax effects
     useEffect(() => {
-        const handleMouseMove = (e) => {
+        interface MousePosition {
+            x: number;
+            y: number;
+        }
+
+        interface MouseMoveEvent extends MouseEvent {
+            clientX: number;
+            clientY: number;
+        }
+
+        const handleMouseMove = (e: MouseMoveEvent) => {
             const { clientX, clientY } = e;
             const { innerWidth, innerHeight } = window;
 
             setMousePosition({
-                x: (clientX / innerWidth - 0.5) * 2,
-                y: (clientY / innerHeight - 0.5) * 2,
+            x: (clientX / innerWidth - 0.5) * 2,
+            y: (clientY / innerHeight - 0.5) * 2,
             });
 
             if (cursorRef.current) {
-                gsap.to(cursorRef.current, {
-                    x: clientX,
-                    y: clientY,
-                    duration: 0.3,
-                    ease: "power2.out",
-                });
+            gsap.to(cursorRef.current, {
+                x: clientX,
+                y: clientY,
+                duration: 0.3,
+                ease: "power2.out",
+            });
             }
         };
 
@@ -250,17 +273,17 @@ const Featured = () => {
     }, [mousePosition, currentIndex]);
 
     // Animation for slides
-    const animateSlide = (newIndex, direction = "next") => {
+    const animateSlide = (newIndex:number, direction = "next") => {
         if (isAnimating || newIndex === currentIndex) return;
 
         setIsAnimating(true);
 
         const slider = sliderRef.current;
-        const currentSlide = slider.querySelector(
+        const currentSlide = slider?.querySelector(
             `[data-slide="${currentIndex}"]:not([data-slide="new"])`
         );
         const newSlide = createSlide(newsData[newIndex], newIndex, true);
-        slider.appendChild(newSlide);
+        slider?.appendChild(newSlide);
 
         if (!currentSlide) {
             setIsAnimating(false);
@@ -372,7 +395,7 @@ const Featured = () => {
         animateSlide(newIndex, "prev");
     };
 
-    const handleSlideClick = (index) => {
+    const handleSlideClick = (index:number) => {
         if (index !== currentIndex) {
             const direction = index > currentIndex ? "next" : "prev";
             animateSlide(index, direction);

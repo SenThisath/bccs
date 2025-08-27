@@ -27,7 +27,7 @@ export default function LoadingAnimation() {
     const countRef = useRef(null);
     const contentRef = useRef(null);
 
-    const stayTuned = false;
+    const stayTuned = true;
 
     // Loading animation
     useGSAP(
@@ -58,7 +58,7 @@ export default function LoadingAnimation() {
                     0
                 )
                 .to({}, { duration: 0.3 })
-                .to(loadingBarRef.current.parentElement, {
+                .to((loadingBarRef.current as HTMLElement).parentElement, {
                     rotation: 90,
                     scale: 900,
                     transformOrigin: "center",

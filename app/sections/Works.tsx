@@ -35,7 +35,7 @@ const Works = () => {
             "Set Design",
         ];
 
-        function createSlide(slideNumber, direction) {
+        function createSlide(slideNumber: number, direction: string) {
             const slide = document.createElement("div");
             slide.className = "slide";
             slide.setAttribute("data-slide", "new"); // Mark as new for identification
@@ -59,7 +59,10 @@ const Works = () => {
             return slide;
         }
 
-        function createMainImageWrapper(slideNumber, direction) {
+        function createMainImageWrapper(
+            slideNumber: number,
+            direction: string
+        ) {
             const wrapper = document.createElement("div");
             wrapper.className = "slide-main-img-wrapper";
             wrapper.setAttribute("data-wrapper", "new"); // Mark as new for identification
@@ -79,7 +82,7 @@ const Works = () => {
             return wrapper;
         }
 
-        function createTextElements(slideNumber, direction) {
+        function createTextElements(slideNumber: number, direction: string) {
             const newTitle = document.createElement("h1");
             newTitle.textContent = slideTitles[slideNumber - 1];
             newTitle.setAttribute("data-title", "new"); // Mark as new
@@ -91,14 +94,14 @@ const Works = () => {
             gsap.set(newDescription, { y: direction === "down" ? 20 : -20 });
 
             const newCounter = document.createElement("p");
-            newCounter.textContent = slideNumber;
+            newCounter.textContent = slideNumber.toString();
             newCounter.setAttribute("data-counter", "new"); // Mark as new
             gsap.set(newCounter, { y: direction === "down" ? 18 : -18 });
 
             return { newTitle, newDescription, newCounter };
         }
 
-        function animateSlide(direction) {
+        function animateSlide(direction: string) {
             if (isAnimating || !scrollAllowed) return;
             isAnimating = true;
             scrollAllowed = false;
@@ -113,8 +116,8 @@ const Works = () => {
 
             // Get current elements (ones without data attributes or with data="current")
             const currentSliderElement =
-                slider.querySelector(".slide:not([data-slide='new'])") ||
-                slider.querySelector(".slide");
+                slider?.querySelector(".slide:not([data-slide='new'])") ||
+                slider?.querySelector(".slide");
             const currentMainWrapper =
                 mainImageContainer?.querySelector(
                     ".slide-main-img-wrapper:not([data-wrapper='new'])"
@@ -150,11 +153,11 @@ const Works = () => {
                 direction
             );
 
-            slider.appendChild(newSlide);
-            mainImageContainer.appendChild(newMainWrapper);
-            titleContainer.appendChild(newTitle);
-            descriptionContainer.appendChild(newDescription);
-            counterContainer.appendChild(newCounter);
+            slider?.appendChild(newSlide);
+            mainImageContainer?.appendChild(newMainWrapper);
+            titleContainer?.appendChild(newTitle);
+            descriptionContainer?.appendChild(newDescription);
+            counterContainer?.appendChild(newCounter);
 
             gsap.set(newMainWrapper.querySelector("img"), {
                 y: direction === "down" ? "-50%" : "50%",
@@ -197,7 +200,7 @@ const Works = () => {
                 0
             )
                 .to(
-                    currentSliderElement?.querySelector("img"),
+                    currentSliderElement?.querySelector("img") ?? [],
                     {
                         scale: 1.5,
                         duration: 1.25,
@@ -218,7 +221,7 @@ const Works = () => {
                     0
                 )
                 .to(
-                    currentMainWrapper?.querySelector("img"),
+                    currentMainWrapper?.querySelector("img") ?? [],
                     {
                         y: direction === "down" ? "50%" : "-50%",
                         duration: 1.25,
@@ -236,7 +239,7 @@ const Works = () => {
                     0
                 )
                 .to(
-                    currentTitle,
+                    currentTitle ? currentTitle : [],
                     {
                         y: direction === "down" ? -50 : 50,
                         duration: 1.25,
@@ -254,7 +257,7 @@ const Works = () => {
                     0
                 )
                 .to(
-                    currentDescription,
+                    currentDescription ? currentDescription : [],
                     {
                         y: direction === "down" ? -20 : 20,
                         duration: 1.25,
@@ -272,7 +275,7 @@ const Works = () => {
                     0
                 )
                 .to(
-                    currentCounter,
+                    currentCounter ? currentCounter : [],
                     {
                         y: direction === "down" ? -18 : 18,
                         duration: 1.25,
@@ -291,7 +294,7 @@ const Works = () => {
                 );
         }
 
-        function handleScroll(direction) {
+        function handleScroll(direction: string) {
             const now = Date.now();
             if (isAnimating || !scrollAllowed) return;
             if (now - lastScrollTime < 1000) return;
@@ -299,34 +302,46 @@ const Works = () => {
             animateSlide(direction);
         }
 
-        function handleButtonClick(direction) {
+        function handleButtonClick(direction: string) {
             if (isAnimating || !scrollAllowed) return;
             animateSlide(direction);
         }
 
         // ---- Event handlers ----
-        const wheelHandler = (e) => {
+        interface WheelHandlerEvent extends WheelEvent {
+            deltaY: number;
+        }
+
+        const wheelHandler = (e: WheelHandlerEvent) => {
             e.preventDefault();
-            const direction = e.deltaY > 0 ? "down" : "up";
+            const direction: "down" | "up" = e.deltaY > 0 ? "down" : "up";
             handleScroll(direction);
         };
 
         let touchStartY = 0;
         let isTouchActive = false;
 
-        const touchStartHandler = (e) => {
+        interface TouchStartEvent extends TouchEvent {
+            touches: TouchList;
+        }
+
+        const touchStartHandler = (e: TouchStartEvent) => {
             touchStartY = e.touches[0].clientY;
             isTouchActive = true;
         };
 
-        const touchMoveHandler = (e) => {
+        interface TouchMoveEvent extends TouchEvent {
+            touches: TouchList;
+        }
+
+        const touchMoveHandler = (e: TouchMoveEvent) => {
             e.preventDefault();
             if (!isTouchActive || isAnimating || !scrollAllowed) return;
-            const touchCurrentY = e.touches[0].clientY;
-            const difference = touchStartY - touchCurrentY;
+            const touchCurrentY: number = e.touches[0].clientY;
+            const difference: number = touchStartY - touchCurrentY;
             if (Math.abs(difference) > 10) {
                 isTouchActive = false;
-                const direction = difference > 0 ? "down" : "up";
+                const direction: "down" | "up" = difference > 0 ? "down" : "up";
                 handleScroll(direction);
             }
         };
@@ -340,32 +355,41 @@ const Works = () => {
         let isMouseDragging = false;
         let hasMouseMoved = false;
 
-        const mouseDownHandler = (e) => {
+        const mouseDownHandler = (e: Event) => {
+            const mouseEvent = e as MouseEvent;
             if (isAnimating || !scrollAllowed) return;
-            mouseStartX = e.clientX;
+            mouseStartX = mouseEvent.clientX;
             isMouseDragging = true;
             hasMouseMoved = false;
-            e.preventDefault();
+            mouseEvent.preventDefault();
         };
 
-        const mouseMoveHandler = (e) => {
+        interface MouseMoveHandlerEvent extends MouseEvent {
+            clientX: number;
+        }
+
+        const mouseMoveHandler = (e: MouseMoveHandlerEvent) => {
             if (!isMouseDragging) return;
-            const difference = e.clientX - mouseStartX;
+            const difference: number = e.clientX - mouseStartX;
             if (Math.abs(difference) > 5) {
                 hasMouseMoved = true;
             }
         };
 
-        const mouseUpHandler = (e) => {
+        interface MouseUpHandlerEvent extends MouseEvent {
+            clientX: number;
+        }
+
+        const mouseUpHandler = (e: MouseUpHandlerEvent) => {
             if (!isMouseDragging || !hasMouseMoved) {
                 isMouseDragging = false;
                 return;
             }
 
-            const difference = e.clientX - mouseStartX;
+            const difference: number = e.clientX - mouseStartX;
             if (Math.abs(difference) > 50) {
                 // Minimum drag distance
-                const direction = difference > 0 ? "up" : "down"; // Right drag = previous, Left drag = next
+                const direction: "up" | "down" = difference > 0 ? "up" : "down"; // Right drag = previous, Left drag = next
                 handleScroll(direction);
             }
 
@@ -389,7 +413,7 @@ const Works = () => {
 
         // Mouse drag listeners
         const slider = document.querySelector(".slider");
-        slider.addEventListener("mousedown", mouseDownHandler);
+        slider?.addEventListener("mousedown", mouseDownHandler);
         window.addEventListener("mousemove", mouseMoveHandler);
         window.addEventListener("mouseup", mouseUpHandler);
 
@@ -406,9 +430,9 @@ const Works = () => {
         const counterContainer = document.querySelector(".count");
 
         // Clear any existing content first
-        titleContainer.innerHTML = "";
-        descriptionContainer.innerHTML = "";
-        counterContainer.innerHTML = "";
+        if (titleContainer) titleContainer.innerHTML = "";
+        if (descriptionContainer) descriptionContainer.innerHTML = "";
+        if (counterContainer) counterContainer.innerHTML = "";
 
         const { newTitle, newDescription, newCounter } = createTextElements(
             1,
@@ -420,9 +444,9 @@ const Works = () => {
         newDescription.removeAttribute("data-description");
         newCounter.removeAttribute("data-counter");
 
-        titleContainer.appendChild(newTitle);
-        descriptionContainer.appendChild(newDescription);
-        counterContainer.appendChild(newCounter);
+        titleContainer?.appendChild(newTitle);
+        descriptionContainer?.appendChild(newDescription);
+        counterContainer?.appendChild(newCounter);
 
         // Set initial positions to 0
         gsap.set([newTitle, newDescription, newCounter], { y: 0 });

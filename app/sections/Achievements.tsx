@@ -3,7 +3,8 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 const Achievements = () => {
-    const canvasRef = useRef(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -56,7 +57,7 @@ const Achievements = () => {
         const totalWidth = slideCount * (slideWidth + gap);
         const slideUnit = slideWidth + gap;
 
-        const slides = [];
+        const slides: THREE.Mesh[] = [];
         let currentPosition = 0;
         let targetPosition = 0;
         let isScrolling = false;
@@ -73,7 +74,7 @@ const Achievements = () => {
         let currentDistortionFactor = 0;
         let targetDistortionFactor = 0;
         let peakVelocity = 0;
-        let velocityHistory = [0, 0, 0, 0, 0];
+        const velocityHistory = [0, 0, 0, 0, 0];
 
         const achievementData = [
             {
@@ -114,7 +115,7 @@ const Achievements = () => {
             },
         ];
 
-        const createSlide = (index, achievementIndex) => {
+        const createSlide = (index:number, achievementIndex:number) => {
             const geometry = new THREE.PlaneGeometry(
                 slideWidth,
                 slideHeight,
@@ -130,6 +131,9 @@ const Achievements = () => {
             canvas.width = 512;
             canvas.height = 512;
             const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                throw new Error("Failed to get 2D context for achievement slide canvas.");
+            }
 
             // Create gradient background
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -212,31 +216,35 @@ const Achievements = () => {
             slide.userData.currentX = slide.position.x;
         });
 
-        const updateCurve = (mesh, worldPositionX, distortionFactor) => {
+        const updateCurve = (
+            mesh: THREE.Mesh,
+            worldPositionX: number,
+            distortionFactor: number
+        ) => {
             const distortionCenter = new THREE.Vector2(0, 0);
             const distortionRadius = 3.0;
             const maxCurvature = settings.maxDistortion * distortionFactor;
-            const positionAttribute = mesh.geometry.attributes.position;
-            const originalVertices = mesh.userData.originalVertices;
+            const positionAttribute = mesh.geometry.attributes.position as THREE.BufferAttribute;
+            const originalVertices = mesh.userData.originalVertices as number[];
 
             for (let i = 0; i < positionAttribute.count; i++) {
-                const x = originalVertices[i * 3];
-                const y = originalVertices[i * 3 + 1];
+            const x = originalVertices[i * 3];
+            const y = originalVertices[i * 3 + 1];
 
-                const vertexWorldPosX = worldPositionX + x;
-                const distFromCenter = Math.sqrt(
-                    Math.pow(vertexWorldPosX - distortionCenter.x, 2) +
-                        Math.pow(y - distortionCenter.y, 2)
-                );
+            const vertexWorldPosX = worldPositionX + x;
+            const distFromCenter = Math.sqrt(
+                Math.pow(vertexWorldPosX - distortionCenter.x, 2) +
+                Math.pow(y - distortionCenter.y, 2)
+            );
 
-                const distortionStrength = Math.max(
-                    0,
-                    1 - distFromCenter / distortionRadius
-                );
+            const distortionStrength = Math.max(
+                0,
+                1 - distFromCenter / distortionRadius
+            );
 
-                const curveZ = Math.pow(distortionStrength, 2) * maxCurvature;
+            const curveZ = Math.pow(distortionStrength, 2) * maxCurvature;
 
-                positionAttribute.setZ(i, curveZ);
+            positionAttribute.setZ(i, curveZ);
             }
             positionAttribute.needsUpdate = true;
             mesh.geometry.computeVertexNormals();
@@ -254,80 +262,110 @@ const Achievements = () => {
         };
 
         // Event listeners
-        const handleKeyDown = (e) => {
+        interface KeyDownEvent extends KeyboardEvent {
+            key: string;
+        }
+
+        const handleKeyDown = (e: KeyDownEvent): void => {
             if (e.key === "ArrowLeft") {
-                targetPosition += slideUnit;
-                targetDistortionFactor = Math.min(
-                    1.0,
-                    targetDistortionFactor + 0.3
-                );
+            targetPosition += slideUnit;
+            targetDistortionFactor = Math.min(
+                1.0,
+                targetDistortionFactor + 0.3
+            );
             } else if (e.key === "ArrowRight") {
-                targetPosition -= slideUnit;
-                targetDistortionFactor = Math.min(
-                    1.0,
-                    targetDistortionFactor + 0.3
-                );
+            targetPosition -= slideUnit;
+            targetDistortionFactor = Math.min(
+                1.0,
+                targetDistortionFactor + 0.3
+            );
             }
         };
 
-        const handleWheel = (e) => {
+        interface WheelEventWithDelta extends WheelEvent {
+            deltaY: number;
+        }
+
+        const handleWheel = (e: WheelEventWithDelta) => {
             e.preventDefault();
-            const wheelStrength = Math.abs(e.deltaY * 0.0005);
+            const wheelStrength: number = Math.abs(e.deltaY * 0.0005);
             targetDistortionFactor = Math.min(
-                0.8,
-                targetDistortionFactor + wheelStrength
+            0.8,
+            targetDistortionFactor + wheelStrength
             );
             targetPosition -= e.deltaY * settings.wheelSensitivity;
             isScrolling = true;
             autoScrollSpeed =
-                Math.min(Math.abs(e.deltaY) * 0.0002, 0.02) *
-                Math.sign(e.deltaY);
-
-            clearTimeout(window.scrollTimeout);
-            window.scrollTimeout = setTimeout(() => {
-                isScrolling = false;
+            Math.min(Math.abs(e.deltaY) * 0.0002, 0.02) *
+            Math.sign(e.deltaY);
+            if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+            }
+            scrollTimeoutRef.current = setTimeout(() => {
+            isScrolling = false;
             }, 200);
         };
 
-        const handleTouchStart = (e) => {
+        interface TouchStartEvent extends TouchEvent {
+            touches: TouchList;
+        }
+
+        const handleTouchStart = (e: TouchStartEvent): void => {
             touchStartX = e.touches[0].clientX;
             touchLastX = touchStartX;
             isScrolling = false;
         };
 
-        const handleTouchMove = (e) => {
+        interface TouchMoveEvent extends TouchEvent {
+            touches: TouchList;
+        }
+
+        const handleTouchMove = (e: TouchMoveEvent) => {
             e.preventDefault();
-            const touchX = e.touches[0].clientX;
-            const deltaX = touchX - touchLastX;
+            const touchX: number = e.touches[0].clientX;
+            const deltaX: number = touchX - touchLastX;
             touchLastX = touchX;
 
-            const touchStrength = Math.abs(deltaX) * 0.01;
+            const touchStrength: number = Math.abs(deltaX) * 0.01;
             targetDistortionFactor = Math.min(
-                0.8,
-                targetDistortionFactor + touchStrength
+            0.8,
+            targetDistortionFactor + touchStrength
             );
             targetPosition -= deltaX * settings.touchSensitivity;
         };
 
-        const handleTouchEnd = (e) => {
-            const velocity = (touchLastX - touchStartX) * 0.005;
+        interface TouchEndEvent extends TouchEvent {
+            changedTouches: TouchList;
+        }
+
+        interface TouchEndHandler {
+            (e: TouchEndEvent): void;
+        }
+
+        const handleTouchEnd: TouchEndHandler = (e) => {
+            const velocity: number = (touchLastX - touchStartX) * 0.005;
             if (Math.abs(velocity) > 0.5) {
-                autoScrollSpeed =
-                    -velocity * settings.momentumMultiplier * 0.05;
-                targetDistortionFactor = Math.min(
-                    1.0,
-                    targetDistortionFactor +
-                        Math.abs(velocity) * 3 * settings.distortionSensitivity
-                );
-                isScrolling = true;
-                setTimeout(() => {
-                    isScrolling = false;
-                }, 800);
+            autoScrollSpeed =
+                -velocity * settings.momentumMultiplier * 0.05;
+            targetDistortionFactor = Math.min(
+                1.0,
+                targetDistortionFactor +
+                Math.abs(velocity) * 3 * settings.distortionSensitivity
+            );
+            isScrolling = true;
+            setTimeout(() => {
+                isScrolling = false;
+            }, 800);
             }
         };
 
         // Mouse drag handlers
-        const handleMouseDown = (e) => {
+        interface MouseDownEvent extends MouseEvent {
+            clientX: number;
+            preventDefault: () => void;
+        }
+
+        const handleMouseDown = (e: MouseDownEvent): void => {
             isDragging = true;
             mouseStartX = e.clientX;
             mouseLastX = mouseStartX;
@@ -335,22 +373,38 @@ const Achievements = () => {
             e.preventDefault();
         };
 
-        const handleMouseMove = (e) => {
+        interface MouseMoveEvent extends MouseEvent {
+            clientX: number;
+        }
+
+        interface HandleMouseMove {
+            (e: MouseMoveEvent): void;
+        }
+
+        const handleMouseMove: HandleMouseMove = (e) => {
             if (!isDragging) return;
 
-            const mouseX = e.clientX;
-            const deltaX = mouseX - mouseLastX;
+            const mouseX: number = e.clientX;
+            const deltaX: number = mouseX - mouseLastX;
             mouseLastX = mouseX;
 
-            const dragStrength = Math.abs(deltaX) * 0.01;
+            const dragStrength: number = Math.abs(deltaX) * 0.01;
             targetDistortionFactor = Math.min(
-                0.8,
-                targetDistortionFactor + dragStrength
+            0.8,
+            targetDistortionFactor + dragStrength
             );
             targetPosition -= deltaX * settings.touchSensitivity;
         };
 
-        const handleMouseUp = (e) => {
+        interface MouseUpEvent extends MouseEvent {
+            clientX: number;
+        }
+
+        interface HandleMouseUp {
+            (e: MouseUpEvent): void;
+        }
+
+        const handleMouseUp: HandleMouseUp = (e) => {
             if (!isDragging) return;
 
             isDragging = false;
@@ -358,21 +412,21 @@ const Achievements = () => {
 
             const velocity = (mouseLastX - mouseStartX) * 0.005;
             if (Math.abs(velocity) > 0.5) {
-                autoScrollSpeed =
-                    -velocity * settings.momentumMultiplier * 0.05;
-                targetDistortionFactor = Math.min(
-                    1.0,
-                    targetDistortionFactor +
-                        Math.abs(velocity) * 3 * settings.distortionSensitivity
-                );
-                isScrolling = true;
-                setTimeout(() => {
-                    isScrolling = false;
-                }, 800);
+            autoScrollSpeed =
+                -velocity * settings.momentumMultiplier * 0.05;
+            targetDistortionFactor = Math.min(
+                1.0,
+                targetDistortionFactor +
+                Math.abs(velocity) * 3 * settings.distortionSensitivity
+            );
+            isScrolling = true;
+            setTimeout(() => {
+                isScrolling = false;
+            }, 800);
             }
         };
 
-        const handleMouseLeave = (e) => {
+        const handleMouseLeave = (e: MouseEvent) => {
             if (isDragging) {
                 isDragging = false;
                 canvas.style.cursor = "grab";
@@ -500,19 +554,20 @@ const Achievements = () => {
             // Remove mouse drag event listeners
             canvas.removeEventListener("mousedown", handleMouseDown);
             window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
-            canvas.removeEventListener("mouseleave", handleMouseLeave);
-
-            if (window.scrollTimeout) {
-                clearTimeout(window.scrollTimeout);
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
             }
+            // Removed window.scrollTimeout cleanup as it is not defined or used
 
             // Clean up Three.js resources
-            slides.forEach((slide) => {
+            slides.forEach((slide: THREE.Mesh) => {
                 scene.remove(slide);
-                slide.geometry.dispose();
-                slide.material.dispose();
-                if (slide.material.map) slide.material.map.dispose();
+                (slide.geometry as THREE.BufferGeometry).dispose();
+                const material = slide.material as THREE.Material;
+                material.dispose();
+                if ("map" in material && material.map) {
+                    (material.map as THREE.Texture).dispose();
+                }
             });
             renderer.dispose();
         };
