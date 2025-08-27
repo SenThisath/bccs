@@ -14,7 +14,6 @@ const StayTuned: React.FC = () => {
         />
       </div>
 
-      {/* Main Text */}
       <div className="text-center space-y-4 md:space-y-6">
         <p className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold uppercase">
           Coming <br /> Soon
