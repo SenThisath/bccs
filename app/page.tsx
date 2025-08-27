@@ -27,7 +27,7 @@ export default function LoadingAnimation() {
     const countRef = useRef(null);
     const contentRef = useRef(null);
 
-    const stayTuned = true;
+    const stayTuned = false;
 
     // Loading animation
     useGSAP(
