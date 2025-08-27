@@ -5,7 +5,6 @@ import React from "react";
 const StayTuned: React.FC = () => {
   return (
     <div className="relative bg-black text-white h-screen w-full flex flex-col justify-center items-center px-4 md:px-0">
-      {/* Logo */}
       <div className="w-40 h-16 relative flex items-center justify-center">
         <Image
           src="/logo2.png"
