@@ -1,483 +1,529 @@
 "use client";
 
+import GlassSurface from "@/components/LiquidGlass";
 import gsap from "gsap";
-import React, { useEffect } from "react";
 import CustomEase from "gsap/CustomEase";
+import { useEffect } from "react";
 
 gsap.registerPlugin(CustomEase);
 
 const Works = () => {
-    const sliderContent = [
-        { name: "Serene Space", img: "https://picsum.photos/400/600?random=1" },
-        { name: "Gentle Horizon", img: "https://picsum.photos/400/600?random=2" },
-        { name: "Quiet Flow", img: "https://picsum.photos/400/600?random=3" },
-        { name: "Ethereal Light", img: "https://picsum.photos/400/600?random=4" },
-        { name: "Calm Drift", img: "https://picsum.photos/400/600?random=5" },
-        { name: "Subtle Balance", img: "https://picsum.photos/400/600?random=6" },
-    ];
-
     useEffect(() => {
-        CustomEase.create(
-            "hop",
-            "M0,0 CO.488, 0.02 0.467, 0.286 0.5, 0.5 0.532, 0.712 0.58, 1 1, 1"
-        );
-        
-        const slider = document.querySelector(".slider");
-        const sliderTitle = document.querySelector(".slider-title");
-        const sliderCounter = document.querySelector(".slider-counter p span:first-child");
-        const sliderItems = document.querySelector(".slider-items");
-        const sliderPreview = document.querySelector(".slider-preview");
-        const totalSlides = sliderContent.length;
-        let activeSlideIndex = 1;
+        const totalSlides = 7;
+        let currentSlide = 1;
         let isAnimating = false;
-        
-        const clipPath = {
-            closed: "polygon(25% 30%, 75% 30%, 75% 70%, 25% 70%) ",
-            open: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-        };
-        
-        const slidePositions = {
-            prev: { left: "15%", rotation: -90 },
-            active: { left: "50%", rotation: 0 },
-            next: { left: "85%", rotation: 90 },
-        };
+        let scrollAllowed = true;
+        let lastScrollTime = 0;
 
-        function splitTextIntoSpans(element) {
-            if (element) {
-                element.innerHTML = element.innerText
-                    .split("")
-                    .map(char => `<span>${char === " " ? "&nbsp;" : char}</span>`)
-                    .join("");
-            }
-        }
+        const slideTitles = [
+            "Field Unit",
+            "Astral Convergence",
+            "Eclipse Core",
+            "Luminous",
+            "Serenity",
+            "Nebula Point",
+            "Horizon",
+        ];
 
-        function createAndAnimateTitle(content, direction) {
-            const existingTitles = sliderTitle?.querySelectorAll("h1");
-            existingTitles?.forEach((title) => title.remove());
+        const slideDescriptions = [
+            "Concept Art",
+            "Soundscape",
+            "Experimental Film",
+            "Editorial",
+            "Music Video",
+            "VFX",
+            "Set Design",
+        ];
 
-            const newTitle = document.createElement("h1");
-            newTitle.innerText = content.name;
-            sliderTitle?.appendChild(newTitle);
-            splitTextIntoSpans(newTitle);
-
-            const yOffset = direction === "next" ? 60 : -60;
-            gsap.set(newTitle.querySelectorAll("span"), { y: yOffset });
-            gsap.to(newTitle.querySelectorAll("span"), {
-                y: 0,
-                duration: 1.25,
-                stagger: 0.02,
-                ease: "hop",
-                delay: 0.25,
-            });
-        }
-
-        function createSlide(content, className) {
+        function createSlide(slideNumber, direction) {
             const slide = document.createElement("div");
-            slide.className = `slider-container ${className}`;
-            slide.innerHTML = `
-                <div class="slide-img">
-                    <img src="${content.img}" alt="${content.name}" />
-                </div>
-            `;
+            slide.className = "slide";
+            slide.setAttribute("data-slide", "new"); // Mark as new for identification
+
+            const slideBgImg = document.createElement("div");
+            slideBgImg.className = "slide-bg-img";
+
+            const img = document.createElement("img");
+            img.src = `https://picsum.photos/400/600?random=${slideNumber}`;
+            slideBgImg.appendChild(img);
+            slide.appendChild(slideBgImg);
+
+            if (direction === "down") {
+                slideBgImg.style.clipPath =
+                    "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)";
+            } else {
+                slideBgImg.style.clipPath =
+                    "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)";
+            }
+
             return slide;
         }
 
-        function getSlideIndex(increment) {
-            return (
-                ((activeSlideIndex + increment - 1 + totalSlides) % totalSlides) + 1
-            );
-        }
+        function createMainImageWrapper(slideNumber, direction) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "slide-main-img-wrapper";
+            wrapper.setAttribute("data-wrapper", "new"); // Mark as new for identification
 
-        function updateCounterAndHightLight(index) {
-            if (sliderCounter) {
-                sliderCounter.textContent = index;
+            const img = document.createElement("img");
+            img.src = `https://picsum.photos/400/600?random=${slideNumber}`;
+            wrapper.appendChild(img);
+
+            if (direction === "down") {
+                wrapper.style.clipPath =
+                    "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)";
+            } else {
+                wrapper.style.clipPath =
+                    "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)";
             }
-            sliderItems?.querySelectorAll("p").forEach((item, i) => {
-                item.classList.toggle("activeItem", i === index - 1);
-            });
+
+            return wrapper;
         }
 
-        function updatePreviewImage(content) {
-            const existingImages = sliderPreview?.querySelectorAll("img");
-            existingImages?.forEach((img) => img.remove());
+        function createTextElements(slideNumber, direction) {
+            const newTitle = document.createElement("h1");
+            newTitle.textContent = slideTitles[slideNumber - 1];
+            newTitle.setAttribute("data-title", "new"); // Mark as new
+            gsap.set(newTitle, { y: direction === "down" ? 50 : -50 });
 
-            const newImage = document.createElement("img");
-            newImage.src = content.img;
-            newImage.alt = content.name;
+            const newDescription = document.createElement("p");
+            newDescription.textContent = slideDescriptions[slideNumber - 1];
+            newDescription.setAttribute("data-description", "new"); // Mark as new
+            gsap.set(newDescription, { y: direction === "down" ? 20 : -20 });
 
-            sliderPreview?.appendChild(newImage);
+            const newCounter = document.createElement("p");
+            newCounter.textContent = slideNumber;
+            newCounter.setAttribute("data-counter", "new"); // Mark as new
+            gsap.set(newCounter, { y: direction === "down" ? 18 : -18 });
 
-            gsap.fromTo(
-                newImage,
-                { opacity: 0 },
-                {
-                    opacity: 1,
-                    duration: 1,
-                    ease: "power2.inOut",
-                }
-            );
+            return { newTitle, newDescription, newCounter };
         }
 
-        function animateSlide(slide, props) {
-            gsap.to(slide, { 
-                left: props.left,
-                rotation: props.rotation,
-                clipPath: props.clipPath,
-                duration: 2, 
-                ease: "hop" 
-            });
-            gsap.to(slide.querySelectorAll(".slide-img"), {
-                rotation: -props.rotation,
-                duration: 2,
-                ease: "hop",
-            });
-        }
-
-        function transitionSlides(direction) {
-            if (isAnimating) return;
+        function animateSlide(direction) {
+            if (isAnimating || !scrollAllowed) return;
             isAnimating = true;
+            scrollAllowed = false;
 
-            const [outgoingPos, incomingPos] =
-                direction === "next" ? ["prev", "next"] : ["next", "prev"];
-            const outgoingSlide = slider.querySelector(`.${outgoingPos}`);
-            const activeSlide = slider.querySelector(`.active`);
-            const incomingSlide = slider.querySelector(`.${incomingPos}`);
+            const slider = document.querySelector(".slider");
+            const mainImageContainer =
+                document.querySelector(".slide-main-img");
+            const titleContainer = document.querySelector(".slide-title");
+            const descriptionContainer =
+                document.querySelector(".slide-description");
+            const counterContainer = document.querySelector(".count");
 
-            animateSlide(incomingSlide, {
-                ...slidePositions.active,
-                clipPath: clipPath.open,
-            });
-            animateSlide(activeSlide, {
-                ...slidePositions[outgoingPos],
-                clipPath: clipPath.closed,
-            });
-            gsap.to(outgoingSlide, {
-                scale: 0,
-                opacity: 0,
-                duration: 2,
-                ease: "hop",
-            });
+            // Get current elements (ones without data attributes or with data="current")
+            const currentSliderElement =
+                slider.querySelector(".slide:not([data-slide='new'])") ||
+                slider.querySelector(".slide");
+            const currentMainWrapper =
+                mainImageContainer?.querySelector(
+                    ".slide-main-img-wrapper:not([data-wrapper='new'])"
+                ) ||
+                mainImageContainer?.querySelector(".slide-main-img-wrapper");
+            const currentTitle =
+                titleContainer?.querySelector("h1:not([data-title='new'])") ||
+                titleContainer?.querySelector("h1");
+            const currentDescription =
+                descriptionContainer?.querySelector(
+                    "p:not([data-description='new'])"
+                ) || descriptionContainer?.querySelector("p");
+            const currentCounter =
+                counterContainer?.querySelector(
+                    "p:not([data-counter='new'])"
+                ) || counterContainer?.querySelector("p");
 
-            const newSlideIndex = getSlideIndex(direction === "next" ? 2 : -2);
-            const newSlide = createSlide(
-                sliderContent[newSlideIndex - 1],
-                incomingPos
+            if (direction === "down") {
+                currentSlide =
+                    currentSlide === totalSlides ? 1 : currentSlide + 1;
+            } else {
+                currentSlide =
+                    currentSlide === 1 ? totalSlides : currentSlide - 1;
+            }
+
+            const newSlide = createSlide(currentSlide, direction);
+            const newMainWrapper = createMainImageWrapper(
+                currentSlide,
+                direction
+            );
+            const { newTitle, newDescription, newCounter } = createTextElements(
+                currentSlide,
+                direction
             );
 
-            slider?.appendChild(newSlide);
+            slider.appendChild(newSlide);
+            mainImageContainer.appendChild(newMainWrapper);
+            titleContainer.appendChild(newTitle);
+            descriptionContainer.appendChild(newDescription);
+            counterContainer.appendChild(newCounter);
 
-            // Fixed positioning - ensure proper centering
-            gsap.set(newSlide, {
-                left: slidePositions[incomingPos].left,
-                top: "50%",
-                xPercent: -50,
-                yPercent: -50,
-                rotation: slidePositions[incomingPos].rotation,
-                scale: 0,
-                opacity: 0,
-                clipPath: clipPath.closed,
+            gsap.set(newMainWrapper.querySelector("img"), {
+                y: direction === "down" ? "-50%" : "50%",
             });
 
-            gsap.to(newSlide, {
-                scale: 1,
-                opacity: 1,
-                duration: 2,
-                ease: "hop",
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    // Remove old elements
+                    if (currentSliderElement) currentSliderElement.remove();
+                    if (currentMainWrapper) currentMainWrapper.remove();
+                    if (currentTitle) currentTitle.remove();
+                    if (currentDescription) currentDescription.remove();
+                    if (currentCounter) currentCounter.remove();
+
+                    // Update data attributes for new elements to mark them as current
+                    newSlide.removeAttribute("data-slide");
+                    newMainWrapper.removeAttribute("data-wrapper");
+                    newTitle.removeAttribute("data-title");
+                    newDescription.removeAttribute("data-description");
+                    newCounter.removeAttribute("data-counter");
+
+                    isAnimating = false;
+                    setTimeout(() => {
+                        scrollAllowed = true;
+                        lastScrollTime = Date.now();
+                    }, 100);
+                },
             });
 
-            const newActiveIndex = getSlideIndex(direction === "next" ? 1 : -1);
-
-            createAndAnimateTitle(sliderContent[newActiveIndex - 1], direction);
-            updatePreviewImage(sliderContent[newActiveIndex - 1]);
-            setTimeout(() => updateCounterAndHightLight(newActiveIndex), 1000);
-
-            function updateAllSlideImages() {
-                const prevIndex = getSlideIndex(-1);
-                const activeIndex = activeSlideIndex;
-                const nextIndex = getSlideIndex(1);
-
-                const prevSlide = slider.querySelector(".prev .slide-img img");
-                if (prevSlide) {
-                    prevSlide.src = sliderContent[prevIndex - 1].img;
-                    prevSlide.alt = sliderContent[prevIndex - 1].name;
-                }
-
-                const activeSlideImg = slider.querySelector(".active .slide-img img");
-                if (activeSlideImg) {
-                    activeSlideImg.src = sliderContent[activeIndex - 1].img;
-                    activeSlideImg.alt = sliderContent[activeIndex - 1].name;
-                }
-
-                const nextSlide = slider.querySelector(".next .slide-img img");
-                if (nextSlide) {
-                    nextSlide.src = sliderContent[nextIndex - 1].img;
-                    nextSlide.alt = sliderContent[nextIndex - 1].name;
-                }
-            }
-
-            setTimeout(() => {
-                outgoingSlide?.remove();
-                activeSlide.className = `slider-container ${outgoingPos}`;
-                incomingSlide.className = `slider-container active`;
-                newSlide.className = `slider-container ${incomingPos}`;
-                activeSlideIndex = newActiveIndex;
-
-                updateAllSlideImages();
-                isAnimating = false;
-            }, 2000);
+            tl.to(
+                newSlide.querySelector(".slide-bg-img"),
+                {
+                    clipPath:
+                        direction === "down"
+                            ? "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)"
+                            : "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                    duration: 1.25,
+                    ease: CustomEase.create("", ".87, 0, .13, 1"),
+                },
+                0
+            )
+                .to(
+                    currentSliderElement?.querySelector("img"),
+                    {
+                        scale: 1.5,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    newMainWrapper,
+                    {
+                        clipPath:
+                            direction === "down"
+                                ? "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)"
+                                : "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    currentMainWrapper?.querySelector("img"),
+                    {
+                        y: direction === "down" ? "50%" : "-50%",
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    newMainWrapper.querySelector("img"),
+                    {
+                        y: "0%",
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    currentTitle,
+                    {
+                        y: direction === "down" ? -50 : 50,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    newTitle,
+                    {
+                        y: 0,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    currentDescription,
+                    {
+                        y: direction === "down" ? -20 : 20,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    newDescription,
+                    {
+                        y: 0,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    currentCounter,
+                    {
+                        y: direction === "down" ? -18 : 18,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                )
+                .to(
+                    newCounter,
+                    {
+                        y: 0,
+                        duration: 1.25,
+                        ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    },
+                    0
+                );
         }
 
-        slider?.addEventListener("click", (e) => {
-            const clickedSlide = e.target.closest(".slider-container");
-            if (clickedSlide && !isAnimating) {
-                transitionSlides(
-                    clickedSlide.classList.contains("next") ? "next" : "prev"
-                );
-            }
-        });
+        function handleScroll(direction) {
+            const now = Date.now();
+            if (isAnimating || !scrollAllowed) return;
+            if (now - lastScrollTime < 1000) return;
+            lastScrollTime = now;
+            animateSlide(direction);
+        }
 
-        // Fixed initial setup - ensure all slides are properly centered
-        Object.entries(slidePositions).forEach(([key, value]) => {
-            gsap.set(`.slider-container.${key}`, {
-                left: value.left,
-                top: "50%",
-                xPercent: -50,
-                yPercent: -50,
-                rotation: value.rotation,
-                clipPath: key === "active" ? clipPath.open : clipPath.closed,
-            });
-            if (key !== "active") {
-                gsap.set(`.slider-container.${key} .slide-img`, {
-                    rotation: -value.rotation,
-                });
-            }
-        });
+        function handleButtonClick(direction) {
+            if (isAnimating || !scrollAllowed) return;
+            animateSlide(direction);
+        }
 
-        const initialTitle = sliderTitle?.querySelector("h1");
-        splitTextIntoSpans(initialTitle);
-        gsap.fromTo(
-            initialTitle?.querySelectorAll("span") || [],
-            { y: 60 },
-            { y: 0, duration: 1, stagger: 0.02, ease: "hop" }
+        // ---- Event handlers ----
+        const wheelHandler = (e) => {
+            e.preventDefault();
+            const direction = e.deltaY > 0 ? "down" : "up";
+            handleScroll(direction);
+        };
+
+        let touchStartY = 0;
+        let isTouchActive = false;
+
+        const touchStartHandler = (e) => {
+            touchStartY = e.touches[0].clientY;
+            isTouchActive = true;
+        };
+
+        const touchMoveHandler = (e) => {
+            e.preventDefault();
+            if (!isTouchActive || isAnimating || !scrollAllowed) return;
+            const touchCurrentY = e.touches[0].clientY;
+            const difference = touchStartY - touchCurrentY;
+            if (Math.abs(difference) > 10) {
+                isTouchActive = false;
+                const direction = difference > 0 ? "down" : "up";
+                handleScroll(direction);
+            }
+        };
+
+        const touchEndHandler = () => {
+            isTouchActive = false;
+        };
+
+        // ---- Mouse drag handlers ----
+        let mouseStartX = 0;
+        let isMouseDragging = false;
+        let hasMouseMoved = false;
+
+        const mouseDownHandler = (e) => {
+            if (isAnimating || !scrollAllowed) return;
+            mouseStartX = e.clientX;
+            isMouseDragging = true;
+            hasMouseMoved = false;
+            e.preventDefault();
+        };
+
+        const mouseMoveHandler = (e) => {
+            if (!isMouseDragging) return;
+            const difference = e.clientX - mouseStartX;
+            if (Math.abs(difference) > 5) {
+                hasMouseMoved = true;
+            }
+        };
+
+        const mouseUpHandler = (e) => {
+            if (!isMouseDragging || !hasMouseMoved) {
+                isMouseDragging = false;
+                return;
+            }
+
+            const difference = e.clientX - mouseStartX;
+            if (Math.abs(difference) > 50) {
+                // Minimum drag distance
+                const direction = difference > 0 ? "up" : "down"; // Right drag = previous, Left drag = next
+                handleScroll(direction);
+            }
+
+            isMouseDragging = false;
+            hasMouseMoved = false;
+        };
+
+        // ---- Button click handlers ----
+        const prevButtonHandler = () => handleButtonClick("up");
+        const nextButtonHandler = () => handleButtonClick("down");
+
+        // ---- Attach listeners ----
+        window.addEventListener("wheel", wheelHandler, { passive: false });
+        window.addEventListener("touchstart", touchStartHandler, {
+            passive: false,
+        });
+        window.addEventListener("touchmove", touchMoveHandler, {
+            passive: false,
+        });
+        window.addEventListener("touchend", touchEndHandler);
+
+        // Mouse drag listeners
+        const slider = document.querySelector(".slider");
+        slider.addEventListener("mousedown", mouseDownHandler);
+        window.addEventListener("mousemove", mouseMoveHandler);
+        window.addEventListener("mouseup", mouseUpHandler);
+
+        // Button listeners
+        const prevButton = document.getElementById("prev-btn");
+        const nextButton = document.getElementById("next-btn");
+        prevButton?.addEventListener("click", prevButtonHandler);
+        nextButton?.addEventListener("click", nextButtonHandler);
+
+        // ---- Init first text/counter ----
+        const titleContainer = document.querySelector(".slide-title");
+        const descriptionContainer =
+            document.querySelector(".slide-description");
+        const counterContainer = document.querySelector(".count");
+
+        // Clear any existing content first
+        titleContainer.innerHTML = "";
+        descriptionContainer.innerHTML = "";
+        counterContainer.innerHTML = "";
+
+        const { newTitle, newDescription, newCounter } = createTextElements(
+            1,
+            "down"
         );
 
-        updateCounterAndHightLight(activeSlideIndex);
+        // Remove the "new" data attributes since these are the initial elements
+        newTitle.removeAttribute("data-title");
+        newDescription.removeAttribute("data-description");
+        newCounter.removeAttribute("data-counter");
 
-        sliderItems?.querySelectorAll("p").forEach((item, index) => {
-            item.addEventListener("click", () => {
-                if (index + 1 !== activeSlideIndex && !isAnimating) {
-                    transitionSlides(
-                        index + 1 > activeSlideIndex ? "next" : "prev"
-                    );
-                }
-            });
-        });
+        titleContainer.appendChild(newTitle);
+        descriptionContainer.appendChild(newDescription);
+        counterContainer.appendChild(newCounter);
+
+        // Set initial positions to 0
+        gsap.set([newTitle, newDescription, newCounter], { y: 0 });
+
+        // ---- Cleanup ----
+        return () => {
+            window.removeEventListener("wheel", wheelHandler);
+            window.removeEventListener("touchstart", touchStartHandler);
+            window.removeEventListener("touchmove", touchMoveHandler);
+            window.removeEventListener("touchend", touchEndHandler);
+
+            // Remove mouse drag listeners
+            const slider = document.querySelector(".slider");
+            slider?.removeEventListener("mousedown", mouseDownHandler);
+            window.removeEventListener("mousemove", mouseMoveHandler);
+            window.removeEventListener("mouseup", mouseUpHandler);
+
+            // Remove button listeners
+            const prevButton = document.getElementById("prev-btn");
+            const nextButton = document.getElementById("next-btn");
+            prevButton?.removeEventListener("click", prevButtonHandler);
+            nextButton?.removeEventListener("click", nextButtonHandler);
+        };
     }, []);
 
     return (
-        <div style={{
-            display: 'flex',
-            height: '100vh',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%'
-        }}>
-            <style jsx>{`
-                .slider {
-                    position: relative;
-                    width: 80vw;
-                    height: 80vh;
-                    overflow: hidden;
-                }
-
-                .slider-container {
-                    position: absolute;
-                    width: 30%;
-                    height: 70%;
-                    background-color: #000;
-                    cursor: pointer;
-                    will-change: transform, opacity, clip-path;
-                    z-index: 2;
-                }
-
-                .slide-img {
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    will-change: transform;
-                    overflow: hidden;
-                }
-
-                .slide-img img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transform: scale(1);
-                    opacity: 0.75;
-                    will-change: transform;
-                    animation: pan 20s linear infinite;
-                }
-
-                .slider-title {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 25%;
-                    height: 25%;
-                    text-align: center;
-                    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-                    pointer-events: none;
-                    z-index: 10;
-                }
-
-                .slider-title h1 {
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #fff;
-                    font-size: 50px;
-                    font-weight: 500;
-                    margin: 0;
-                }
-
-                .slider-title h1 span {
-                    position: relative;
-                    display: inline-block;
-                    transform: translateY(50px);
-                    will-change: transform;
-                }
-
-                .slider-counter {
-                    position: absolute;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    bottom: 10rem;
-                    text-align: center;
-                    z-index: 2;
-                }
-
-                .slider-counter p {
-                    display: flex;
-                    gap: 1em;
-                    justify-content: center;
-                    color: #fff;
-                    margin: 0;
-                }
-
-                .slider-items {
-                    position: absolute;
-                    left: 2.5em;
-                    bottom: 10rem;
-                    z-index: 2;
-                }
-
-                .slider-items p {
-                    transition: 0.5s color;
-                    color: #666;
-                    cursor: pointer;
-                    margin: 0.5rem 0;
-                }
-
-                .slider-items p:hover {
-                    color: #ccc;
-                }
-
-                .slider-items p.activeItem {
-                    color: #fff;
-                }
-
-                .slider-preview {
-                    position: absolute;
-                    top: 25%;
-                    left: 50%;
-                    transform: translate(-50%);
-                    width: 75%;
-                    margin: 0 auto;
-                    height: 100%;
-                    z-index: 0;
-                    opacity: 0;
-                    overflow: hidden;
-                }
-
-                .slider-preview img {
-                    position: absolute;
-                    top: 0;
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    animation: pan 20s linear infinite;
-                }
-
-                @keyframes pan {
-                    0% {
-                        transform: scale(1);
-                    }
-                    50% {
-                        transform: scale(1.25);
-                    }
-                    100% {
-                        transform: scale(1);
-                    }
-                }
-            `}</style>
-            
-            <div className="slider">
-                <div className="slider-container prev">
-                    <div className="slide-img">
-                        <img
-                            src={sliderContent[5].img}
-                            alt={sliderContent[5].name}
-                        />
-                    </div>
-                </div>
-                <div className="slider-container active">
-                    <div className="slide-img">
-                        <img
-                            src={sliderContent[0].img}
-                            alt={sliderContent[0].name}
-                        />
-                    </div>
-                </div>
-                <div className="slider-container next">
-                    <div className="slide-img">
-                        <img
-                            src={sliderContent[1].img}
-                            alt={sliderContent[1].name}
-                        />
-                    </div>
-                </div>
-
-                <div className="slider-title">
-                    <h1>{sliderContent[0].name}</h1>
-                </div>
-
+        <div className="relative">
+            <footer>
+                <p>All Projects</p>
                 <div className="slider-counter">
-                    <p>
-                        <span>1</span>
-                        <span>/</span>
-                        <span>{sliderContent.length}</span>
-                    </p>
+                    <div className="count"></div>
+                    <p>/</p>
+                    <p>7</p>
                 </div>
+            </footer>
 
-                <div className="slider-items">
-                    {sliderContent.map((item, index) => (
-                        <p
-                            key={index}
-                            className={index === 0 ? "activeItem" : ""}
-                        >
-                            {item.name}
-                        </p>
-                    ))}
+            <div
+                id="prev-btn"
+                style={{ userSelect: "none" }}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-white transition-all duration-300 hover:scale-110"
+            >
+                <GlassSurface className="p-2 rounded-full">
+                    <svg
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M15 18L9 12L15 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </GlassSurface>
+            </div>
+
+            <div
+                id="next-btn"
+                style={{ userSelect: "none" }}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white transition-all duration-300 hover:scale-110"
+            >
+                <GlassSurface className="p-2 rounded-full">
+                    <svg
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M9 18L15 12L9 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </GlassSurface>
+            </div>
+
+            <div
+                className="slider"
+                style={{ cursor: "grab", userSelect: "none" }}
+            >
+                <div className="slide">
+                    <div className="slide-bg-img">
+                        <img src="https://picsum.photos/400/600?random=1" />
+                    </div>
                 </div>
-                <div className="slider-preview">
-                    <img
-                        src={sliderContent[0].img}
-                        alt={sliderContent[0].name}
-                    />
+                <div className="slide-main-img">
+                    <div className="slide-main-img-wrapper">
+                        <img src="https://picsum.photos/400/600?random=1" />
+                    </div>
+                </div>
+                <div className="slide-copy">
+                    <div className="slide-title"></div>
+                    <div className="slide-description"></div>
                 </div>
             </div>
         </div>
