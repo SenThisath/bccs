@@ -6,7 +6,7 @@ const StayTuned: React.FC = () => {
   return (
     <div className="relative bg-black text-white h-screen w-full flex flex-col justify-center items-center px-4 md:px-0">
       {/* Logo */}
-      <div className="w-24 h-24 md:w-36 md:h-36 relative overflow-hidden flex items-center justify-center mb-6">
+      <div className="w-48 h-15 relative overflow-hidden flex items-center justify-center">
         <Image
           src="/logo2.png"
           alt="Logo"
@@ -17,7 +17,7 @@ const StayTuned: React.FC = () => {
 
       {/* Main Text */}
       <div className="text-center space-y-4 md:space-y-6">
-        <p className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold uppercase leading-tight md:leading-tight">
+        <p className="text-7xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold uppercase">
           Coming <br /> Soon
         </p>
       </div>
