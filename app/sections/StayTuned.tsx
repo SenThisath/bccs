@@ -18,14 +18,15 @@ const StayTuned: React.FC = () => {
 
             {/* Title */}
             <div className="text-center space-y-4 md:space-y-6">
-                <p className="text-8xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold uppercase flex items-center justify-center flex-col leading-tight">
-                    <FuzzyText baseIntensity={0.2}>
-                        Coming
-                    </FuzzyText>
-                    <FuzzyText baseIntensity={0.2}>
-                        Soon
-                    </FuzzyText>
-                </p>
+     <p className="text-[15vw] sm:text-[12vw] md:text-[10vw] lg:text-[8vw] font-extrabold uppercase flex items-center justify-center flex-col leading-tight">
+    <FuzzyText baseIntensity={0.2}>
+        Coming
+    </FuzzyText>
+    <FuzzyText baseIntensity={0.2}>
+        Soon
+    </FuzzyText>
+</p>
+
             </div>
 
             {/* Footer */}
