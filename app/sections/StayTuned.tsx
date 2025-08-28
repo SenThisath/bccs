@@ -6,7 +6,8 @@ import React from "react";
 const StayTuned: React.FC = () => {
     return (
         <div className="relative bg-black text-white h-screen w-full flex flex-col justify-center items-center px-4 md:px-0">
-            <div className="w-40 h-16 relative flex items-center justify-center">
+            {/* Logo */}
+            <div className="w-24 h-10 sm:w-28 sm:h-12 md:w-40 md:h-16 relative flex items-center justify-center">
                 <Image
                     src="/logo2.png"
                     alt="Logo"
@@ -15,8 +16,9 @@ const StayTuned: React.FC = () => {
                 />
             </div>
 
+            {/* Title */}
             <div className="text-center space-y-4 md:space-y-6">
-                <p className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold uppercase flex items-center justify-center flex-col">
+                <p className="text-8xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold uppercase flex items-center justify-center flex-col leading-tight">
                     <FuzzyText baseIntensity={0.2}>
                         Coming
                     </FuzzyText>
