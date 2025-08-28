@@ -5,7 +5,7 @@ import React from "react";
 
 const StayTuned: React.FC = () => {
     return (
-        <div className="relative bg-black text-white h-dvh w-full flex flex-col justify-center items-center px-4 md:px-0">
+        <div className="relative bg-black text-white h-screen w-full flex flex-col justify-center items-center px-4 md:px-0">
             {/* Logo */}
             <div className="w-24 h-10 sm:w-28 sm:h-12 md:w-40 md:h-16 relative flex items-center justify-center">
                 <Image
