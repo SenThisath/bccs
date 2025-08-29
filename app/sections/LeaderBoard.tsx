@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, FC } from "react";
 import { gsap } from "gsap";
+import Image from "next/image";
 
 const collection = [
     {
@@ -616,12 +617,13 @@ export const LeaderBoard: FC = () => {
                                         }
                                     }}
                                 >
-                                    <img
+                                    <Image
                                         src={collection[cardIndex].img}
                                         alt={collection[cardIndex].title}
                                         className="w-full h-full object-cover"
                                         draggable={false}
                                         style={{ backfaceVisibility: "hidden" }}
+                                        priority={true}
                                     />
                                 </div>
                             );
