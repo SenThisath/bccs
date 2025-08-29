@@ -164,7 +164,7 @@ Discover fresh perspectives and thought-provoking ideas that shape the future. O
                         <Works />
 
                         <Heading
-                            title="Goals Reached"
+                            title="Projects"
                             desc="Every milestone reflects our commitment and hard work. From small victories to major recognitions, we celebrate progress that defines our growth.
 "
                         />

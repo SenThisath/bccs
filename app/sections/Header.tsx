@@ -93,7 +93,7 @@ const Header = () => {
                         <a href="#">Home</a>
                         <a href="#inFocus">In Focus</a>
                         <a href="#ourStory">Our Story</a>
-                        <a href="#goalsReached">Goals Reached</a>
+                        <a href="#goalsReached">Projects</a>
                         <a href="#showcase">Showcase</a>
                         <a href="#fallOfFame">Hall of fame</a>
                         <a href="#contact">Contact</a>
@@ -140,7 +140,7 @@ const Header = () => {
                     { name: "In Focus", link: "#inFocus" },
                     { name: "Our Story", link: "#ourStory" },
                     {
-                        name: "Goals Reached",
+                        name: "Projects",
                         link: "#goalsReached",
                     },
                     { name: "Showcase", link: "#showcase" },
