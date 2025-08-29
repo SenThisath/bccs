@@ -44,6 +44,18 @@ export const Achievements = () => {
     const projects: Project[] = [
         {
             id: 1,
+            title: "Aspect",
+            client: "Tesla Neural",
+            year: "2025",
+            category: "AI Consciousness",
+            description:
+                "The first ever dedicated ict competition in bandaranayake college gampaha was launched officially, By the principal of bandaranayake college",
+            image: "/Aspect.png",
+            color: "#00f5ff",
+            accent: "#7209b7",
+        },
+        {
+            id: 2,
             title: "XBan-24",
             client: "Meta Reality Labs",
             year: "2025",
@@ -53,18 +65,6 @@ export const Achievements = () => {
             image: "/xban.jpg",
             color: "#ff006e",
             accent: "#8338ec",
-        },
-        {
-            id: 2,
-            title: "Sync",
-            client: "Tesla Neural",
-            year: "2025",
-            category: "AI Consciousness",
-            description:
-                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory.",
-            image: "/sync.jpg",
-            color: "#00f5ff",
-            accent: "#7209b7",
         },
     ];
 

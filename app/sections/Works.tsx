@@ -14,8 +14,8 @@ const Works = () => {
     const newsData = [
         {
             id: 1,
-            category: "TECHNOLOGY",
-            title: "XBan 2025",
+            category: "Projects",
+            title: "XBan 2024",
             subtitle: "Where Innovation Meets Imagination",
             excerpt:
                 "XBan is the flagship event of BCCS, bringing together brilliant minds to showcase creativity, technology, and problem-solving skills. From competitions to exhibitions, it’s a platform for students to push boundaries, share ideas, and experience the future of tech and innovation.",
@@ -26,7 +26,7 @@ const Works = () => {
         },
         {
             id: 2,
-            category: "SCIENCE",
+            category: "ICT Competition",
             title: "Achievement at Sync 2025",
             subtitle: "Proud Winners at Dharmaraja College",
             excerpt:

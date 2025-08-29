@@ -3,71 +3,70 @@
 import React, { useRef, useEffect, useState, useCallback, FC } from "react";
 import { gsap } from "gsap";
 
-// Updated collection data with descriptions
 const collection = [
     {
-        title: "Nisal Nethsara",
-        img: "https://picsum.photos/400/600?random=1",
+        title: "Nisal Rajapaksha",
+        img: "/nisal.png",
         description: "President",
     },
     {
         title: "Oshan Kavishka",
-        img: "https://picsum.photos/400/600?random=2",
+        img: "/oshan.png",
         description: "Secratry",
     },
     {
         title: "Tharinda Damsara",
-        img: "https://picsum.photos/400/600?random=3",
+        img: "/tharinda.png",
         description: "Vice President",
     },
     {
         title: "Didula Sasadara",
-        img: "https://picsum.photos/400/600?random=4",
+        img: "/didula.png",
         description: "Vice Secratry",
     },
     {
         title: "Sahan Hansajith",
-        img: "https://picsum.photos/400/600?random=5",
+        img: "/sahan.png",
         description: "Treasurer",
     },
     {
         title: "Senanga Divan",
-        img: "https://picsum.photos/400/600?random=6",
+        img: "/senanga.png",
         description: "Chief Organizer",
     },
     {
         title: "Maleesha Nimesh",
-        img: "https://picsum.photos/400/600?random=7",
+        img: "/maleesha.png",
         description: "Organizer",
     },
     {
         title: "Senuka Thisath",
-        img: "https://picsum.photos/400/600?random=8",
+        img: "/senuka.png",
         description: "Coordinator",
     },
     {
         title: "Janiru Vindiya",
-        img: "https://picsum.photos/400/600?random=9",
+        img: "/janiru.png",
         description: "Editor",
     },
     {
         title: "Tharusha NImsara",
-        img: "https://picsum.photos/400/600?random=10",
+        img: "/tharusha.png",
         description: "Senior Member",
     },
     {
         title: "Prageeth Sathsara",
-        img: "https://picsum.photos/400/600?random=10",
+        img: "/prageeth.png",
         description: "Senior Member",
     },
     {
         title: "Dulina Homalka",
-        img: "/test.jpg",
+        img: "/dulina.png",
         description: "Senior Member",
     },
     {
         title: "Rusara Jayakodi",
-        img: "https://picsum.photos/400/600?random=10",
+        img: "/rusara.png",
         description: "Senior Member",
     },
 ];

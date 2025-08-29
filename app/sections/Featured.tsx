@@ -14,7 +14,7 @@ const Featured = () => {
     const newsData = [
         {
             id: 1,
-            category: "TECHNOLOGY",
+            category: "Projects",
             title: "XBan 2025",
             subtitle: "Where Innovation Meets Imagination",
             excerpt:
@@ -26,15 +26,15 @@ const Featured = () => {
         },
         {
             id: 2,
-            category: "SCIENCE",
-            title: "Achievement at Sync 2025",
-            subtitle: "Proud Winners at Dharmaraja College",
+            category: "ICT Competition",
+            title: "Aspect",
+            subtitle: "Offcially Launched",
             excerpt:
-                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory. This photo captures our proud moment, celebrating innovation, teamwork, and excellence in technology.",
+                "The first ever dedicated ict competition in bandaranayake college gampaha was launched officially, By the principal of bandaranayake college",
             author: "Prof. Marina Rodriguez",
             date: "2025.08.26",
             readTime: "6 MIN",
-            image: "algortithm.jpg",
+            image: "/Aspect.png",
         },
     ];
 

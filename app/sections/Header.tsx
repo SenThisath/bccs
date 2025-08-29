@@ -95,7 +95,7 @@ const Header = () => {
                         <a href="#ourStory">Our Story</a>
                         <a href="#goalsReached">Projects</a>
                         <a href="#showcase">Showcase</a>
-                        <a href="#fallOfFame">Hall of fame</a>
+                        <a href="#fallOfFame">Driving Force</a>
                         <a href="#contact">Contact</a>
                     </div>
                 </div>
@@ -144,7 +144,7 @@ const Header = () => {
                         link: "#goalsReached",
                     },
                     { name: "Showcase", link: "#showcase" },
-                    { name: "Fall of Fame", link: "#fallOfFame" },
+                    { name: "Driving Force", link: "#fallOfFame" },
                     { name: "Contact", link: "#contact" },
                 ].map((item, index) => (
                     <div

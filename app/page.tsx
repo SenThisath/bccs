@@ -172,8 +172,7 @@ Discover fresh perspectives and thought-provoking ideas that shape the future. O
                         <Achievements />
 
                         <Heading
-                            title="Hall of fame
-"
+                            title="Driving Force"
                             desc="Excellence deserves recognition. Our leaderboard showcases the top performers and innovators who set the standard and inspire others to rise.
 "
                         />
