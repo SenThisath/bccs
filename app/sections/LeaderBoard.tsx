@@ -621,6 +621,7 @@ export const LeaderBoard: FC = () => {
                                         src={collection[cardIndex].img}
                                         alt={collection[cardIndex].title}
                                         className="w-full h-full object-cover"
+                                        fill
                                         draggable={false}
                                         style={{ backfaceVisibility: "hidden" }}
                                         priority={true}

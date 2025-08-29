@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import ImageTrail from "@/components/ImageTrail";
+import Image from "next/image";
 
 const ContactUs = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -18,17 +19,21 @@ const ContactUs = () => {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-    }); 
+    });
 
     return (
         <section
             className="relative md:h-screen h-[70vh] flex flex-col w-full items-center bg-white text-black font-sans overflow-hidden p-4 md:p-6 lg:p-8"
             id="contact"
         >
-            <div className="w-12 h-12 md:w-16 md:h-16">
-                <div className="w-full h-full rounded-full flex items-center justify-center text-xs">
-                    <img src={"/logo.png"} />
-                </div>
+            <div className="w-15 h-15 md:w-16 md:h-16 relative">
+                <Image
+                    src="/logo.png" // ideally 256x256 or SVG
+                    alt="logo"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    priority
+                />
             </div>
             {/* Header */}
             <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4 md:gap-0 md:flex-nowrap mt-5">
@@ -90,6 +95,7 @@ const ContactUs = () => {
                     <h1 className="cursor-pointer hover:opacity-70 transition-opacity">
                         Facebook
                     </h1>
+                    <div className="hidden sm:block w-full h-px bg-black mx-4 md:mx-8" />
                     <h1 className="cursor-pointer hover:opacity-70 transition-opacity">
                         WhatsApp
                     </h1>

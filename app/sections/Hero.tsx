@@ -62,6 +62,7 @@ const Hero = () => {
                                     alt="logo"
                                     width={250}
                                     height={200}
+                                    priority
                                 />
                                 <TextType
                                     text={[
