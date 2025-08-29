@@ -1,547 +1,475 @@
 "use client";
 
-import GlassSurface from "@/components/LiquidGlass";
-import gsap from "gsap";
-import CustomEase from "gsap/CustomEase";
-import { useEffect } from "react";
-
-gsap.registerPlugin(CustomEase);
+import { useEffect, useState, useRef } from "react";
+import { gsap } from "gsap";
 
 const Works = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const sliderRef = useRef<HTMLDivElement>(null);
+    const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+    const cursorRef = useRef(null);
+
+    const newsData = [
+        {
+            id: 1,
+            category: "TECHNOLOGY",
+            title: "XBan 2025",
+            subtitle: "Where Innovation Meets Imagination",
+            excerpt:
+                "XBan is the flagship event of BCCS, bringing together brilliant minds to showcase creativity, technology, and problem-solving skills. From competitions to exhibitions, it’s a platform for students to push boundaries, share ideas, and experience the future of tech and innovation.",
+            author: "Dr. Sarah Chen",
+            date: "2025.08.27",
+            readTime: "8 MIN",
+            image: "/xban.jpg",
+        },
+        {
+            id: 2,
+            category: "SCIENCE",
+            title: "Achievement at Sync 2025",
+            subtitle: "Proud Winners at Dharmaraja College",
+            excerpt:
+                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory. This photo captures our proud moment, celebrating innovation, teamwork, and excellence in technology.",
+            author: "Prof. Marina Rodriguez",
+            date: "2025.08.26",
+            readTime: "6 MIN",
+            image: "algortithm.jpg",
+        },
+    ];
+
+    const createSlide = (
+        news: {
+            id: number;
+            category: string;
+            title: string;
+            subtitle: string;
+            excerpt: string;
+            author: string;
+            date: string;
+            readTime: string;
+            image: string;
+        },
+        index: number,
+        isNew = false
+    ) => {
+        const slide = document.createElement("div");
+        slide.className = `absolute inset-0 ${
+            isNew
+                ? "opacity-0 scale-120"
+                : index === 0
+                ? "opacity-100"
+                : "opacity-0"
+        }`;
+        slide.setAttribute("data-slide", isNew ? "new" : String(index));
+        slide.style.perspective = "1000px";
+        slide.style.zIndex =
+            index === currentIndex && !isNew ? "20" : String(index);
+
+        // Background Image with Parallax
+        const bgContainer = document.createElement("div");
+        bgContainer.className = "absolute inset-0 overflow-hidden";
+
+        const bgImage = document.createElement("div");
+        bgImage.className =
+            "bg-image w-full h-full bg-cover bg-center scale-110";
+        bgImage.style.backgroundImage = `url(${news.image})`;
+        bgImage.style.filter = "grayscale(100%)"; // Apply grayscale for black-and-white palette
+        bgContainer.appendChild(bgImage);
+
+        const overlay = document.createElement("div");
+        overlay.className = "absolute inset-0 bg-black/50"; // Black overlay for contrast
+        bgContainer.appendChild(overlay);
+
+        slide.appendChild(bgContainer);
+
+        // Content Wrapper
+        const contentWrapper = document.createElement("div");
+        contentWrapper.className =
+            "content-wrapper relative z-20 h-full flex items-center";
+
+        const contentInner = document.createElement("div");
+        contentInner.className = "w-full max-w-7xl mx-auto px-8 lg:px-16";
+
+        const grid = document.createElement("div");
+        grid.className = "grid lg:grid-cols-2 gap-16 items-center";
+
+        // Text Content
+        const textContent = document.createElement("div");
+        textContent.className = "space-y-8";
+
+        // Category and Date
+        const header = document.createElement("div");
+        header.className = "animate-in";
+        const headerInner = document.createElement("div");
+        headerInner.className = "flex items-center gap-4 mb-4";
+        headerInner.innerHTML = `
+            <span class="text-white/80 text-sm font-mono tracking-wider">${news.category}</span>
+            <div class="h-px bg-white/40 flex-1"></div>
+            <span class="text-white/60 text-sm font-mono">${news.date}</span>
+        `;
+        header.appendChild(headerInner);
+        textContent.appendChild(header);
+
+        // Title
+        const title = document.createElement("div");
+        title.className = "animate-in";
+        const titleInner = document.createElement("h1");
+        titleInner.className =
+            "text-6xl lg:text-7xl font-black text-white leading-[0.9] tracking-tight mb-4";
+        titleInner.innerHTML = news.title
+            .split(" ")
+            .map(
+                (word, i) =>
+                    `<span class="inline-block mr-4 mb-2">${word}</span>`
+            )
+            .join("");
+        title.appendChild(titleInner);
+        textContent.appendChild(title);
+
+        // Subtitle
+        const subtitle = document.createElement("div");
+        subtitle.className = "animate-in";
+        subtitle.innerHTML = `<h2 class="text-2xl font-light text-white/90 mb-8 tracking-wide">${news.subtitle}</h2>`;
+        textContent.appendChild(subtitle);
+
+        // Excerpt
+        const excerpt = document.createElement("div");
+        excerpt.className = "animate-in";
+        excerpt.innerHTML = `<p class="text-lg text-white/80 leading-relaxed max-w-xl font-light">${news.excerpt}</p>`;
+        textContent.appendChild(excerpt);
+
+        // Author and Button
+        // const footer = document.createElement("div");
+        // footer.className = "animate-in flex items-center gap-8 pt-4";
+        // footer.innerHTML = `
+        //     <div>
+        //         <p class="text-white font-semibold">${news.author}</p>
+        //         <p class="text-white/60 text-sm font-mono">${news.readTime}</p>
+        //     </div>
+        //     <button class="group bg-white text-black px-8 py-4 font-bold tracking-wider hover:bg-black hover:text-white transition-all duration-500 relative overflow-hidden">
+        //         <span class="relative z-10">EXPLORE</span>
+        //         <div class="absolute inset-0 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+        //     </button>
+        // `;
+        // textContent.appendChild(footer);
+
+        grid.appendChild(textContent);
+
+        // Visual Element
+        const visual = document.createElement("div");
+        visual.className = "animate-in hidden lg:block";
+        visual.innerHTML = `
+            <div class="relative">
+                <div class="w-96 h-96 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                    <div class="w-80 h-80 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                        <div class="w-64 h-64 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                            <div class="text-white text-8xl font-black opacity-20">
+                                ${String(index + 1).padStart(2, "0")}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.appendChild(visual);
+
+        contentInner.appendChild(grid);
+        contentWrapper.appendChild(contentInner);
+        slide.appendChild(contentWrapper);
+
+        return slide;
+    };
+
+    // Mouse tracking for parallax effects
     useEffect(() => {
-        const totalSlides = 2;
-        let currentSlide = 1;
-        let isAnimating = false;
-        let scrollAllowed = true;
-        let lastScrollTime = 0;
-
-        const images = ["/Sagacious.jpg", "/sync.jpg"];
-
-        const slideTitles = [
-            "BCCS Team at Sync 2023",
-            "Showcasing BCCS Talent at Pushpadana",
-        ];
-
-        const slideDescriptions = [
-            "A glimpse of our talented BCCS members who represented us at Synz, the annual ICT day of Dharmaraja College, Kandy. Together, they showcased skill, creativity, and teamwork that led to our success.",
-            "Our BCCS members proudly participated in the ICT event at Pushpadana Girls’ School, Kandy. This gallery highlights their enthusiasm, collaboration, and innovative spirit during the event.",
-        ];
-
-        function createSlide(slideNumber: number, direction: string) {
-            const slide = document.createElement("div");
-            slide.className = "slide";
-            slide.setAttribute("data-slide", "new"); // Mark as new for identification
-
-            const slideBgImg = document.createElement("div");
-            slideBgImg.className = "slide-bg-img";
-
-            const img = document.createElement("img");
-            img.src = images[slideNumber - 1];
-            slideBgImg.appendChild(img);
-            slide.appendChild(slideBgImg);
-
-            if (direction === "down") {
-                slideBgImg.style.clipPath =
-                    "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)";
-            } else {
-                slideBgImg.style.clipPath =
-                    "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)";
-            }
-
-            return slide;
+        interface MousePosition {
+            x: number;
+            y: number;
         }
 
-        function createMainImageWrapper(
-            slideNumber: number,
-            direction: string
-        ) {
-            const wrapper = document.createElement("div");
-            wrapper.className = "slide-main-img-wrapper";
-            wrapper.setAttribute("data-wrapper", "new"); // Mark as new for identification
-
-            const img = document.createElement("img");
-            img.src = images[slideNumber - 1];
-            wrapper.appendChild(img);
-
-            if (direction === "down") {
-                wrapper.style.clipPath =
-                    "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)";
-            } else {
-                wrapper.style.clipPath =
-                    "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)";
-            }
-
-            return wrapper;
+        interface MouseMoveEvent extends MouseEvent {
+            clientX: number;
+            clientY: number;
         }
 
-        function createTextElements(slideNumber: number, direction: string) {
-            const newTitle = document.createElement("h1");
-            newTitle.textContent = slideTitles[slideNumber - 1];
-            newTitle.setAttribute("data-title", "new"); // Mark as new
-            gsap.set(newTitle, { y: direction === "down" ? 50 : -50 });
+        const handleMouseMove = (e: MouseMoveEvent) => {
+            const { clientX, clientY } = e;
+            const { innerWidth, innerHeight } = window;
 
-            const newDescription = document.createElement("p");
-            newDescription.textContent = slideDescriptions[slideNumber - 1];
-            newDescription.setAttribute("data-description", "new"); // Mark as new
-            gsap.set(newDescription, { y: direction === "down" ? 20 : -20 });
-
-            const newCounter = document.createElement("p");
-            newCounter.textContent = slideNumber.toString();
-            newCounter.setAttribute("data-counter", "new"); // Mark as new
-            gsap.set(newCounter, { y: direction === "down" ? 18 : -18 });
-
-            return { newTitle, newDescription, newCounter };
-        }
-
-        function animateSlide(direction: string) {
-            if (isAnimating || !scrollAllowed) return;
-            isAnimating = true;
-            scrollAllowed = false;
-
-            const slider = document.querySelector(".slider");
-            const mainImageContainer =
-                document.querySelector(".slide-main-img");
-            const titleContainer = document.querySelector(".slide-title");
-            const descriptionContainer =
-                document.querySelector(".slide-description");
-            const counterContainer = document.querySelector(".count");
-
-            // Get current elements (ones without data attributes or with data="current")
-            const currentSliderElement =
-                slider?.querySelector(".slide:not([data-slide='new'])") ||
-                slider?.querySelector(".slide");
-            const currentMainWrapper =
-                mainImageContainer?.querySelector(
-                    ".slide-main-img-wrapper:not([data-wrapper='new'])"
-                ) ||
-                mainImageContainer?.querySelector(".slide-main-img-wrapper");
-            const currentTitle =
-                titleContainer?.querySelector("h1:not([data-title='new'])") ||
-                titleContainer?.querySelector("h1");
-            const currentDescription =
-                descriptionContainer?.querySelector(
-                    "p:not([data-description='new'])"
-                ) || descriptionContainer?.querySelector("p");
-            const currentCounter =
-                counterContainer?.querySelector(
-                    "p:not([data-counter='new'])"
-                ) || counterContainer?.querySelector("p");
-
-            if (direction === "down") {
-                currentSlide =
-                    currentSlide === totalSlides ? 1 : currentSlide + 1;
-            } else {
-                currentSlide =
-                    currentSlide === 1 ? totalSlides : currentSlide - 1;
-            }
-
-            const newSlide = createSlide(currentSlide, direction);
-            const newMainWrapper = createMainImageWrapper(
-                currentSlide,
-                direction
-            );
-            const { newTitle, newDescription, newCounter } = createTextElements(
-                currentSlide,
-                direction
-            );
-
-            slider?.appendChild(newSlide);
-            mainImageContainer?.appendChild(newMainWrapper);
-            titleContainer?.appendChild(newTitle);
-            descriptionContainer?.appendChild(newDescription);
-            counterContainer?.appendChild(newCounter);
-
-            gsap.set(newMainWrapper.querySelector("img"), {
-                y: direction === "down" ? "-50%" : "50%",
+            setMousePosition({
+                x: (clientX / innerWidth - 0.5) * 2,
+                y: (clientY / innerHeight - 0.5) * 2,
             });
 
-            const tl = gsap.timeline({
-                onComplete: () => {
-                    // Remove old elements
-                    if (currentSliderElement) currentSliderElement.remove();
-                    if (currentMainWrapper) currentMainWrapper.remove();
-                    if (currentTitle) currentTitle.remove();
-                    if (currentDescription) currentDescription.remove();
-                    if (currentCounter) currentCounter.remove();
+            if (cursorRef.current) {
+                gsap.to(cursorRef.current, {
+                    x: clientX,
+                    y: clientY,
+                    duration: 0.3,
+                    ease: "power2.out",
+                });
+            }
+        };
 
-                    // Update data attributes for new elements to mark them as current
-                    newSlide.removeAttribute("data-slide");
-                    newMainWrapper.removeAttribute("data-wrapper");
-                    newTitle.removeAttribute("data-title");
-                    newDescription.removeAttribute("data-description");
-                    newCounter.removeAttribute("data-counter");
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
+    }, []);
 
-                    isAnimating = false;
-                    setTimeout(() => {
-                        scrollAllowed = true;
-                        lastScrollTime = Date.now();
-                    }, 100);
-                },
-            });
+    // Parallax effect for backgrounds
+    useEffect(() => {
+        if (sliderRef.current) {
+            const activeSlide = sliderRef.current.querySelector(
+                `[data-slide="${currentIndex}"]:not([data-slide="new"])`
+            );
+            if (activeSlide) {
+                const bgImage = activeSlide.querySelector(".bg-image");
+                if (bgImage) {
+                    gsap.to(bgImage, {
+                        x: mousePosition.x * 20,
+                        y: mousePosition.y * 20,
+                        duration: 0.5,
+                        ease: "power2.out",
+                    });
+                }
+            }
+        }
+    }, [mousePosition, currentIndex]);
 
-            tl.to(
-                newSlide.querySelector(".slide-bg-img"),
+    // Animation for slides
+    const animateSlide = (newIndex: number, direction = "next") => {
+        if (isAnimating || newIndex === currentIndex) return;
+
+        setIsAnimating(true);
+
+        const slider = sliderRef.current;
+        const currentSlide = slider?.querySelector(
+            `[data-slide="${currentIndex}"]:not([data-slide="new"])`
+        );
+        const newSlide = createSlide(newsData[newIndex], newIndex, true);
+        slider?.appendChild(newSlide);
+
+        if (!currentSlide) {
+            setIsAnimating(false);
+            return;
+        }
+
+        const isNext = direction === "next";
+        const tl = gsap.timeline({
+            onComplete: () => {
+                // Remove old slide
+                if (currentSlide) currentSlide.remove();
+                // Update new slide to be the current one
+                newSlide.setAttribute("data-slide", String(newIndex));
+                setCurrentIndex(newIndex);
+                setIsAnimating(false);
+            },
+        });
+
+        // Ensure next slide content starts hidden
+        gsap.set(newSlide.querySelectorAll(".animate-in"), {
+            opacity: 0,
+            y: isNext ? 100 : -100,
+            rotationX: isNext ? 90 : -90,
+        });
+
+        // Animate current slide out
+        tl.to(
+            currentSlide,
+            {
+                opacity: 0,
+                scale: 0.8,
+                rotationY: isNext ? -15 : 15,
+                duration: 0.8,
+                ease: "power3.inOut",
+            },
+            0
+        )
+            .to(
+                currentSlide.querySelector(".content-wrapper"),
                 {
-                    clipPath:
-                        direction === "down"
-                            ? "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)"
-                            : "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                    duration: 1.25,
-                    ease: CustomEase.create("", ".87, 0, .13, 1"),
+                    y: isNext ? -100 : 100,
+                    opacity: 0,
+                    duration: 0.6,
+                    ease: "power3.inOut",
                 },
                 0
             )
-                .to(
-                    currentSliderElement?.querySelector("img") ?? [],
-                    {
-                        scale: 1.5,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    newMainWrapper,
-                    {
-                        clipPath:
-                            direction === "down"
-                                ? "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)"
-                                : "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    currentMainWrapper?.querySelector("img") ?? [],
-                    {
-                        y: direction === "down" ? "50%" : "-50%",
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    newMainWrapper.querySelector("img"),
-                    {
-                        y: "0%",
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    currentTitle ? currentTitle : [],
-                    {
-                        y: direction === "down" ? -50 : 50,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    newTitle,
-                    {
-                        y: 0,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    currentDescription ? currentDescription : [],
-                    {
-                        y: direction === "down" ? -20 : 20,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    newDescription,
-                    {
-                        y: 0,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    currentCounter ? currentCounter : [],
-                    {
-                        y: direction === "down" ? -18 : 18,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                )
-                .to(
-                    newCounter,
-                    {
-                        y: 0,
-                        duration: 1.25,
-                        ease: CustomEase.create("", ".87, 0, .13, 1"),
-                    },
-                    0
-                );
+            .to(
+                currentSlide.querySelector(".bg-image"),
+                {
+                    scale: 1.2,
+                    filter: "blur(10px)",
+                    duration: 0.8,
+                    ease: "power3.inOut",
+                },
+                0
+            );
+
+        // Animate new slide in
+        tl.fromTo(
+            newSlide,
+            {
+                opacity: 0,
+                scale: 1.2,
+                rotationY: isNext ? 15 : -15,
+            },
+            {
+                opacity: 1,
+                scale: 1,
+                rotationY: 0,
+                duration: 1,
+                ease: "power3.out",
+            },
+            0.3
+        )
+            .fromTo(
+                newSlide.querySelector(".bg-image"),
+                { scale: 1.3, filter: "blur(20px)" },
+                {
+                    scale: 1,
+                    filter: "blur(0px)",
+                    duration: 1.2,
+                    ease: "power3.out",
+                },
+                0.3
+            )
+            .to(
+                newSlide.querySelectorAll(".animate-in"),
+                {
+                    y: 0,
+                    opacity: 1,
+                    rotationX: 0,
+                    duration: 0.8,
+                    stagger: 0.1,
+                    ease: "back.out(1.7)",
+                },
+                0.6
+            );
+    };
+
+    const handleNext = () => {
+        const newIndex = (currentIndex + 1) % newsData.length;
+        animateSlide(newIndex, "next");
+    };
+
+    const handlePrev = () => {
+        const newIndex =
+            currentIndex === 0 ? newsData.length - 1 : currentIndex - 1;
+        animateSlide(newIndex, "prev");
+    };
+
+    const handleSlideClick = (index: number) => {
+        if (index !== currentIndex) {
+            const direction = index > currentIndex ? "next" : "prev";
+            animateSlide(index, direction);
+        }
+    };
+
+    // Auto-play
+    const startAutoPlay = () => {
+        if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+        autoPlayRef.current = setInterval(handleNext, 8000);
+    };
+
+    const stopAutoPlay = () => {
+        if (autoPlayRef.current) {
+            clearInterval(autoPlayRef.current);
+            autoPlayRef.current = null;
+        }
+    };
+
+    // Initialize first slide
+    useEffect(() => {
+        if (sliderRef.current) {
+            // Clear any existing content
+            sliderRef.current.innerHTML = "";
+            // Create and append the initial slide
+            const initialSlide = createSlide(newsData[0], 0);
+            sliderRef.current.appendChild(initialSlide);
+            // Ensure initial slide is visible
+            gsap.set(initialSlide, { opacity: 1, scale: 1 });
         }
 
-        function handleScroll(direction: string) {
-            const now = Date.now();
-            if (isAnimating || !scrollAllowed) return;
-            if (now - lastScrollTime < 1000) return;
-            lastScrollTime = now;
-            animateSlide(direction);
-        }
-
-        function handleButtonClick(direction: string) {
-            if (isAnimating || !scrollAllowed) return;
-            animateSlide(direction);
-        }
-
-        // ---- Event handlers ----
-        interface WheelHandlerEvent extends WheelEvent {
-            deltaY: number;
-        }
-
-        const wheelHandler = (e: WheelHandlerEvent) => {
-            e.preventDefault();
-            const direction: "down" | "up" = e.deltaY > 0 ? "down" : "up";
-            handleScroll(direction);
-        };
-
-        let touchStartY = 0;
-        let isTouchActive = false;
-
-        interface TouchStartEvent extends TouchEvent {
-            touches: TouchList;
-        }
-
-        const touchStartHandler = (e: TouchStartEvent) => {
-            touchStartY = e.touches[0].clientY;
-            isTouchActive = true;
-        };
-
-        interface TouchMoveEvent extends TouchEvent {
-            touches: TouchList;
-        }
-
-        const touchMoveHandler = (e: TouchMoveEvent) => {
-            e.preventDefault();
-            if (!isTouchActive || isAnimating || !scrollAllowed) return;
-            const touchCurrentY: number = e.touches[0].clientY;
-            const difference: number = touchStartY - touchCurrentY;
-            if (Math.abs(difference) > 10) {
-                isTouchActive = false;
-                const direction: "down" | "up" = difference > 0 ? "down" : "up";
-                handleScroll(direction);
-            }
-        };
-
-        const touchEndHandler = () => {
-            isTouchActive = false;
-        };
-
-        // ---- Mouse drag handlers ----
-        let mouseStartX = 0;
-        let isMouseDragging = false;
-        let hasMouseMoved = false;
-
-        const mouseDownHandler = (e: Event) => {
-            const mouseEvent = e as MouseEvent;
-            if (isAnimating || !scrollAllowed) return;
-            mouseStartX = mouseEvent.clientX;
-            isMouseDragging = true;
-            hasMouseMoved = false;
-            mouseEvent.preventDefault();
-        };
-
-        interface MouseMoveHandlerEvent extends MouseEvent {
-            clientX: number;
-        }
-
-        const mouseMoveHandler = (e: MouseMoveHandlerEvent) => {
-            if (!isMouseDragging) return;
-            const difference: number = e.clientX - mouseStartX;
-            if (Math.abs(difference) > 5) {
-                hasMouseMoved = true;
-            }
-        };
-
-        interface MouseUpHandlerEvent extends MouseEvent {
-            clientX: number;
-        }
-
-        const mouseUpHandler = (e: MouseUpHandlerEvent) => {
-            if (!isMouseDragging || !hasMouseMoved) {
-                isMouseDragging = false;
-                return;
-            }
-
-            const difference: number = e.clientX - mouseStartX;
-            if (Math.abs(difference) > 50) {
-                // Minimum drag distance
-                const direction: "up" | "down" = difference > 0 ? "up" : "down"; // Right drag = previous, Left drag = next
-                handleScroll(direction);
-            }
-
-            isMouseDragging = false;
-            hasMouseMoved = false;
-        };
-
-        // ---- Button click handlers ----
-        const prevButtonHandler = () => handleButtonClick("up");
-        const nextButtonHandler = () => handleButtonClick("down");
-
-        // ---- Attach listeners ----
-        window.addEventListener("wheel", wheelHandler, { passive: false });
-        window.addEventListener("touchstart", touchStartHandler, {
-            passive: false,
-        });
-        window.addEventListener("touchmove", touchMoveHandler, {
-            passive: false,
-        });
-        window.addEventListener("touchend", touchEndHandler);
-
-        // Mouse drag listeners
-        const slider = document.querySelector(".slider");
-        slider?.addEventListener("mousedown", mouseDownHandler);
-        window.addEventListener("mousemove", mouseMoveHandler);
-        window.addEventListener("mouseup", mouseUpHandler);
-
-        // Button listeners
-        const prevButton = document.getElementById("prev-btn");
-        const nextButton = document.getElementById("next-btn");
-        prevButton?.addEventListener("click", prevButtonHandler);
-        nextButton?.addEventListener("click", nextButtonHandler);
-
-        // ---- Init first text/counter ----
-        const titleContainer = document.querySelector(".slide-title");
-        const descriptionContainer =
-            document.querySelector(".slide-description");
-        const counterContainer = document.querySelector(".count");
-
-        // Clear any existing content first
-        if (titleContainer) titleContainer.innerHTML = "";
-        if (descriptionContainer) descriptionContainer.innerHTML = "";
-        if (counterContainer) counterContainer.innerHTML = "";
-
-        const { newTitle, newDescription, newCounter } = createTextElements(
-            1,
-            "down"
-        );
-
-        // Remove the "new" data attributes since these are the initial elements
-        newTitle.removeAttribute("data-title");
-        newDescription.removeAttribute("data-description");
-        newCounter.removeAttribute("data-counter");
-
-        titleContainer?.appendChild(newTitle);
-        descriptionContainer?.appendChild(newDescription);
-        counterContainer?.appendChild(newCounter);
-
-        // Set initial positions to 0
-        gsap.set([newTitle, newDescription, newCounter], { y: 0 });
-
-        // ---- Cleanup ----
-        return () => {
-            window.removeEventListener("wheel", wheelHandler);
-            window.removeEventListener("touchstart", touchStartHandler);
-            window.removeEventListener("touchmove", touchMoveHandler);
-            window.removeEventListener("touchend", touchEndHandler);
-
-            // Remove mouse drag listeners
-            const slider = document.querySelector(".slider");
-            slider?.removeEventListener("mousedown", mouseDownHandler);
-            window.removeEventListener("mousemove", mouseMoveHandler);
-            window.removeEventListener("mouseup", mouseUpHandler);
-
-            // Remove button listeners
-            const prevButton = document.getElementById("prev-btn");
-            const nextButton = document.getElementById("next-btn");
-            prevButton?.removeEventListener("click", prevButtonHandler);
-            nextButton?.removeEventListener("click", nextButtonHandler);
-        };
+        startAutoPlay();
+        return stopAutoPlay;
     }, []);
 
     return (
-        <div className="relative">
-            <footer>
-                <p>All Projects</p>
-                <div className="slider-counter">
-                    <div className="count"></div>
-                    <p>/</p>
-                    <p>7</p>
-                </div>
-            </footer>
-
+        <div className="relative w-full h-screen bg-black">
+            {/* Main Slider Container */}
             <div
-                id="prev-btn"
-                style={{ userSelect: "none" }}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-white transition-all duration-300 hover:scale-110"
-            >
-                <GlassSurface className="p-2 rounded-full">
-                    <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            d="M15 18L9 12L15 6"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </GlassSurface>
-            </div>
+                ref={sliderRef}
+                className="relative w-full h-full"
+                onMouseEnter={stopAutoPlay}
+                onMouseLeave={startAutoPlay}
+            ></div>
 
-            <div
-                id="next-btn"
-                style={{ userSelect: "none" }}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white transition-all duration-300 hover:scale-110"
-            >
-                <GlassSurface className="p-2 rounded-full">
-                    <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            d="M9 18L15 12L9 6"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </GlassSurface>
-            </div>
+            {/* Navigation */}
+            <div className="absolute bottom-8 left-8 right-8 z-30">
+                <div className="flex justify-between items-end">
+                    {/* Slide Thumbnails */}
+                    <div className="md:flex gap-4 hidden">
+                        {newsData.map((news, index) => (
+                            <button
+                                key={news.id}
+                                onClick={() => handleSlideClick(index)}
+                                disabled={isAnimating}
+                                className={`group relative overflow-hidden transition-all duration-500 ${
+                                    index === currentIndex
+                                        ? "w-32 h-20 opacity-100"
+                                        : "w-20 h-12 opacity-60 hover:opacity-80"
+                                }`}
+                            >
+                                <img
+                                    src={news.image}
+                                    alt={news.title}
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                                />
+                                <div className="absolute inset-0 bg-black/50" />
+                                <div className="absolute inset-0 border-2 border-white/20 group-hover:border-white/60 transition-all duration-300" />
+                                {index === currentIndex && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
 
-            <div
-                className="slider"
-                style={{ cursor: "grab", userSelect: "none" }}
-            >
-                <div className="slide">
-                    <div className="slide-bg-img">
-                        <img src="https://picsum.photos/400/600?random=1" />
+                    {/* Controls */}
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={handlePrev}
+                            disabled={isAnimating}
+                            className="w-12 h-12 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-50"
+                        >
+                            ←
+                        </button>
+                        <div className="text-white font-mono text-lg">
+                            {String(currentIndex + 1).padStart(2, "0")} /{" "}
+                            {String(newsData.length).padStart(2, "0")}
+                        </div>
+                        <button
+                            onClick={handleNext}
+                            disabled={isAnimating}
+                            className="w-12 h-12 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-50"
+                        >
+                            →
+                        </button>
                     </div>
                 </div>
-                <div className="slide-main-img">
-                    <div className="slide-main-img-wrapper">
-                        <img src="https://picsum.photos/400/600?random=1" />
-                    </div>
-                </div>
-                <div className="slide-copy">
-                    <div className="slide-title"></div>
-                    <div className="slide-description"></div>
-                </div>
             </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0%,
+                    100% {
+                        transform: translateY(0) rotate(0deg);
+                    }
+                    50% {
+                        transform: translateY(-20px) rotate(180deg);
+                    }
+                }
+            `}</style>
         </div>
     );
 };

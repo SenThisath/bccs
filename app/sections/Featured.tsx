@@ -409,7 +409,7 @@ const Featured = () => {
             <div className="absolute bottom-8 left-8 right-8 z-30">
                 <div className="flex justify-between items-end">
                     {/* Slide Thumbnails */}
-                    <div className="flex gap-4">
+                    <div className="md:flex gap-4 hidden">
                         {newsData.map((news, index) => (
                             <button
                                 key={news.id}

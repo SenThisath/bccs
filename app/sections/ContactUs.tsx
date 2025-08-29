@@ -18,11 +18,11 @@ const ContactUs = () => {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-    }); // HH:MM:SS
+    }); 
 
     return (
         <section
-            className="relative min-h-screen flex flex-col w-full items-center bg-white text-black font-sans overflow-hidden p-4 md:p-6 lg:p-8"
+            className="relative md:h-screen h-[50vh] flex flex-col w-full items-center bg-white text-black font-sans overflow-hidden p-4 md:p-6 lg:p-8"
             id="contact"
         >
             <div className="w-12 h-12 md:w-16 md:h-16">
@@ -39,7 +39,7 @@ const ContactUs = () => {
 
                 <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5 px-0 md:px-8 whitespace-nowrap uppercase text-xs md:text-sm">
                     <div className="bg-gray-500 text-white px-4 md:px-8 py-2 md:py-2 rounded-full">
-                        email@team.bccs.official@gmail.com
+                        team.bccs.official@gmail.com
                     </div>
                     <div className="bg-black text-white px-4 md:px-8 py-2 md:py-2 rounded-full">
                         Contact Us

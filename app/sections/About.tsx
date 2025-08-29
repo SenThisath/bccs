@@ -3,22 +3,21 @@ import React from "react";
 
 const About = () => {
     return (
-        <div className="h-screen flex items-center justify-center bg-black text-white text-center">
-            <div className="w-[60%] h-[80%]">
+        <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
+            <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
                 <ScrollReveal
                     baseOpacity={10}
                     enableBlur={true}
                     baseRotation={10}
                     blurStrength={20}
                     containerClassName="text-white"
+                    textClassName="text-lg sm:text-xl md:text-6xl leading-relaxed"
                 >
-                    The Bandaranayake College Computer Society is a hub for
-                    young innovators and tech enthusiasts, dedicated to
-                    exploring the world of computing, programming, and digital
-                    creativity. Through workshops, competitions, and
-                    collaborative projects, BCCS empowers students to develop
-                    their technical skills, stay ahead in modern technology, and
-                    inspire innovation within the school community.
+                    The Bandaranayake College Computer Society (BCCS) is a hub
+                    for young tech enthusiasts, offering workshops,
+                    competitions, and projects that build technical skills,
+                    foster creativity, and inspire innovation within the school
+                    community.
                 </ScrollReveal>
             </div>
         </div>

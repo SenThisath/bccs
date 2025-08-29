@@ -13,7 +13,6 @@ interface Project {
     image: string;
     color: string;
     accent: string;
-    tech: string[];
 }
 
 interface MouseVelocity {
@@ -29,8 +28,14 @@ interface MousePosition {
 export const Achievements = () => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
-    const [mouseVelocity, setMouseVelocity] = useState<MouseVelocity>({ x: 0, y: 0 });
-    const [lastMousePos, setLastMousePos] = useState<MousePosition>({ x: 0, y: 0 });
+    const [mouseVelocity, setMouseVelocity] = useState<MouseVelocity>({
+        x: 0,
+        y: 0,
+    });
+    const [lastMousePos, setLastMousePos] = useState<MousePosition>({
+        x: 0,
+        y: 0,
+    });
     const containerRef = useRef<HTMLDivElement>(null);
     const waveRef = useRef<HTMLDivElement>(null);
     const autoplayRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,11 +49,10 @@ export const Achievements = () => {
             year: "2025",
             category: "XR Interface",
             description:
-                "XBan is the flagship event of BCCS, bringing together brilliant minds to showcase creativity, technology, and problem-solving skills. From competitions to exhibitions, it's a platform for students to push boundaries, share ideas, and experience the future of tech and innovation.",
+                "XBan is the flagship event of BCCS, bringing together brilliant minds to showcase creativity, technology, and problem-solving skills.",
             image: "/xban.jpg",
             color: "#ff006e",
             accent: "#8338ec",
-            tech: ["WebXR", "Quantum UI", "Neural Mesh"],
         },
         {
             id: 2,
@@ -57,11 +61,10 @@ export const Achievements = () => {
             year: "2025",
             category: "AI Consciousness",
             description:
-                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory. This photo captures our proud moment, celebrating innovation, teamwork, and excellence in technology.",
+                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory.",
             image: "/sync.jpg",
             color: "#00f5ff",
             accent: "#7209b7",
-            tech: ["Neural Networks", "Quantum ML", "Bio-Feedback"],
         },
     ];
 
@@ -90,13 +93,15 @@ export const Achievements = () => {
             setLastMousePos({ x: clientX, y: clientY });
 
             // Distortion effect on elements
-            const distortionElements = document.querySelectorAll(".distort-on-hover");
+            const distortionElements =
+                document.querySelectorAll(".distort-on-hover");
             distortionElements.forEach((el) => {
                 const rect = el.getBoundingClientRect();
                 const centerX = rect.left + rect.width / 2;
                 const centerY = rect.top + rect.height / 2;
                 const distance = Math.sqrt(
-                    Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2)
+                    Math.pow(clientX - centerX, 2) +
+                        Math.pow(clientY - centerY, 2)
                 );
                 const maxDistance = 200;
                 const force = Math.max(0, 1 - distance / maxDistance);
@@ -149,8 +154,12 @@ export const Achievements = () => {
     }, []);
 
     // Experimental slide transition
-    const quantumTransition = (newIndex: number, direction: "next" | "prev" = "next") => {
-        if (isAnimating || newIndex === currentIndex || !containerRef.current) return;
+    const quantumTransition = (
+        newIndex: number,
+        direction: "next" | "prev" = "next"
+    ) => {
+        if (isAnimating || newIndex === currentIndex || !containerRef.current)
+            return;
 
         setIsAnimating(true);
 
@@ -178,9 +187,13 @@ export const Achievements = () => {
                     filter: "none",
                     scale: 1,
                     opacity: (i: number, el: Element) =>
-                        el.getAttribute("data-slide") == newIndex.toString() ? 1 : 0,
+                        el.getAttribute("data-slide") == newIndex.toString()
+                            ? 1
+                            : 0,
                     zIndex: (i: number, el: Element) =>
-                        el.getAttribute("data-slide") == newIndex.toString() ? 10 : 1,
+                        el.getAttribute("data-slide") == newIndex.toString()
+                            ? 10
+                            : 1,
                 });
             },
         });
@@ -290,14 +303,16 @@ export const Achievements = () => {
         if (direction === "next") {
             newIndex = (currentIndex + 1) % projects.length;
         } else {
-            newIndex = currentIndex === 0 ? projects.length - 1 : currentIndex - 1;
+            newIndex =
+                currentIndex === 0 ? projects.length - 1 : currentIndex - 1;
         }
         quantumTransition(newIndex, direction);
     };
 
     const handleDotClick = (index: number) => {
         if (index !== currentIndex && !isAnimating) {
-            const direction: "next" | "prev" = index > currentIndex ? "next" : "prev";
+            const direction: "next" | "prev" =
+                index > currentIndex ? "next" : "prev";
             quantumTransition(index, direction);
         }
     };
@@ -323,7 +338,8 @@ export const Achievements = () => {
     // Initialize
     useEffect(() => {
         if (containerRef.current) {
-            const slides = containerRef.current.querySelectorAll("[data-slide]");
+            const slides =
+                containerRef.current.querySelectorAll("[data-slide]");
             slides.forEach((slide, index) => {
                 if (index === 0) {
                     gsap.set(slide, { opacity: 1, zIndex: 10 });
@@ -409,18 +425,6 @@ export const Achievements = () => {
                             <div className="w-full max-w-7xl mx-auto px-12 grid grid-cols-12 gap-8 items-center">
                                 {/* Left Content */}
                                 <div className="col-span-6 space-y-12">
-                                    {/* Project Meta */}
-                                    <div className="quantum-text distort-on-hover space-y-4">
-                                        <div className="flex items-center gap-8 text-white/40 font-mono text-sm tracking-[0.3em]">
-                                            <span>{project.year}</span>
-                                            <div className="w-24 h-px bg-gradient-to-r from-white/40 to-transparent" />
-                                            <span>{project.category}</span>
-                                        </div>
-                                        <div className="text-white/60 font-light text-lg tracking-wide">
-                                            {project.client}
-                                        </div>
-                                    </div>
-
                                     {/* Main Title */}
                                     <div className="quantum-text">
                                         <h1 className="text-[clamp(4rem,12vw,8rem)] font-black text-white leading-none tracking-tighter distort-on-hover">
@@ -460,21 +464,6 @@ export const Achievements = () => {
                                         <p className="text-xl text-white/80 font-light leading-relaxed">
                                             {project.description}
                                         </p>
-
-                                        {/* Tech Stack */}
-                                        <div className="flex flex-wrap gap-3">
-                                            {project.tech.map((tech, i) => (
-                                                <span
-                                                    key={i}
-                                                    className="px-4 py-2 text-xs font-mono text-white/70 border border-white/20 backdrop-blur-sm"
-                                                    style={{
-                                                        background: `linear-gradient(45deg, ${project.color}10, transparent)`,
-                                                    }}
-                                                >
-                                                    {tech}
-                                                </span>
-                                            ))}
-                                        </div>
                                     </div>
 
                                     {/* CTA */}
@@ -532,47 +521,6 @@ export const Achievements = () => {
                         />
                     </button>
                 ))}
-            </div>
-
-            {/* Advanced Navigation */}
-            <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-30 space-y-8">
-                <button
-                    onClick={() => handleNavigation("prev")}
-                    disabled={isAnimating}
-                    className="distort-on-hover w-20 h-20 border border-white/20 text-white flex items-center justify-center hover:border-white transition-all duration-500 disabled:opacity-30"
-                    style={{
-                        clipPath:
-                            "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
-                    }}
-                >
-                    <div className="transform -rotate-90 text-xl">→</div>
-                </button>
-                <button
-                    onClick={() => handleNavigation("next")}
-                    disabled={isAnimating}
-                    className="distort-on-hover w-20 h-20 border border-white/20 text-white flex items-center justify-center hover:border-white transition-all duration-500 disabled:opacity-30"
-                    style={{
-                        clipPath:
-                            "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
-                    }}
-                >
-                    <div className="transform rotate-90 text-xl">→</div>
-                </button>
-            </div>
-
-            {/* Project Counter */}
-            <div className="absolute top-12 left-12 z-30 font-mono text-white/60">
-                <div className="text-4xl font-black text-white leading-none">
-                    {String(currentIndex + 1).padStart(2, "0")}
-                </div>
-                <div className="text-sm tracking-wider">
-                    — {projects.length} PROJECTS
-                </div>
-            </div>
-
-            {/* Year Display */}
-            <div className="absolute top-12 right-12 z-30 font-mono text-white/40 text-sm tracking-[0.3em]">
-                © {currentProject.year}
             </div>
         </div>
     );
