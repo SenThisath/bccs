@@ -136,33 +136,26 @@ const Header = () => {
             >
                 {/* Multiple menu items */}
                 {[
-                    { year: "2025", name: "Home", link: "#" },
-                    { year: "2025", name: "In Focus", link: "#inFocus" },
-                    { year: "2025", name: "Our Story", link: "#ourStory" },
+                    { name: "Home", link: "#" },
+                    { name: "In Focus", link: "#inFocus" },
+                    { name: "Our Story", link: "#ourStory" },
                     {
-                        year: "2025",
                         name: "Goals Reached",
                         link: "#goalsReached",
                     },
-                    { year: "2025", name: "Showcase", link: "#showcase" },
-                    { year: "2025", name: "Fall of Fame", link: "#fallOfFame" },
-                    { year: "2025", name: "Contact", link: "#contact" },
+                    { name: "Showcase", link: "#showcase" },
+                    { name: "Fall of Fame", link: "#fallOfFame" },
+                    { name: "Contact", link: "#contact" },
                 ].map((item, index) => (
                     <div
                         key={index}
                         className="menu-item flex w-full p-4 cursor-pointer opacity-0 transition duration-300 hover:bg-white/10"
                         onClick={() => handleMenuItemClick(item.link)}
                     >
-                        <div className="flex-1 menu-item-year">
-                            <p>{item.year}</p>
-                        </div>
                         <div className="flex-3 menu-item-name flex justify-center">
                             <p className="font-[PP Formula] text-[3.6vw] text-center">
                                 {item.name}
                             </p>
-                        </div>
-                        <div className="flex-1 menu-item-link">
-                            <span>[explore]</span>
                         </div>
                     </div>
                 ))}
