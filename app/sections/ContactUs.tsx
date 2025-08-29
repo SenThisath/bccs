@@ -22,7 +22,7 @@ const ContactUs = () => {
 
     return (
         <section
-            className="relative md:h-screen h-[50vh] flex flex-col w-full items-center bg-white text-black font-sans overflow-hidden p-4 md:p-6 lg:p-8"
+            className="relative md:h-screen h-[70vh] flex flex-col w-full items-center bg-white text-black font-sans overflow-hidden p-4 md:p-6 lg:p-8"
             id="contact"
         >
             <div className="w-12 h-12 md:w-16 md:h-16">
@@ -89,6 +89,9 @@ const ContactUs = () => {
                     <div className="hidden sm:block w-full h-px bg-black mx-4 md:mx-8" />
                     <h1 className="cursor-pointer hover:opacity-70 transition-opacity">
                         Facebook
+                    </h1>
+                    <h1 className="cursor-pointer hover:opacity-70 transition-opacity">
+                        WhatsApp
                     </h1>
                 </div>
             </div>

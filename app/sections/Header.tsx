@@ -95,7 +95,7 @@ const Header = () => {
                         <a href="#ourStory">Our Story</a>
                         <a href="#goalsReached">Goals Reached</a>
                         <a href="#showcase">Showcase</a>
-                        <a href="#fallOfFame">Fall of fame</a>
+                        <a href="#fallOfFame">Hall of fame</a>
                         <a href="#contact">Contact</a>
                     </div>
                 </div>

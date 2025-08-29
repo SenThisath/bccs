@@ -72,13 +72,13 @@ const Featured = () => {
 
         const bgImage = document.createElement("div");
         bgImage.className =
-            "bg-image w-full h-full bg-cover bg-center scale-110";
+            "bg-image w-full h-full bg-cover bg-center scale-110 transition-transform duration-500";
         bgImage.style.backgroundImage = `url(${news.image})`;
-        bgImage.style.filter = "grayscale(100%)"; // Apply grayscale for black-and-white palette
+        bgImage.style.filter = "grayscale(100%)";
         bgContainer.appendChild(bgImage);
 
         const overlay = document.createElement("div");
-        overlay.className = "absolute inset-0 bg-black/50"; // Black overlay for contrast
+        overlay.className = "absolute inset-0 bg-black/50";
         bgContainer.appendChild(overlay);
 
         slide.appendChild(bgContainer);
@@ -86,27 +86,27 @@ const Featured = () => {
         // Content Wrapper
         const contentWrapper = document.createElement("div");
         contentWrapper.className =
-            "content-wrapper relative z-20 h-full flex items-center";
+            "content-wrapper relative z-20 h-full flex items-center justify-center pt-10 pb-10 sm:pt-16 sm:pb-16";
 
         const contentInner = document.createElement("div");
-        contentInner.className = "w-full max-w-7xl mx-auto px-8 lg:px-16";
+        contentInner.className = "w-full px-4 sm:px-6 lg:px-16 max-w-6xl mx-auto";
 
         const grid = document.createElement("div");
-        grid.className = "grid lg:grid-cols-2 gap-16 items-center";
+        grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center";
 
         // Text Content
         const textContent = document.createElement("div");
-        textContent.className = "space-y-8";
+        textContent.className = "space-y-4 sm:space-y-6";
 
         // Category and Date
         const header = document.createElement("div");
         header.className = "animate-in";
         const headerInner = document.createElement("div");
-        headerInner.className = "flex items-center gap-4 mb-4";
+        headerInner.className = "flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3";
         headerInner.innerHTML = `
-            <span class="text-white/80 text-sm font-mono tracking-wider">${news.category}</span>
+            <span class="text-white/80 text-xs sm:text-sm font-mono tracking-wider">${news.category}</span>
             <div class="h-px bg-white/40 flex-1"></div>
-            <span class="text-white/60 text-sm font-mono">${news.date}</span>
+            <span class="text-white/60 text-xs sm:text-sm font-mono">${news.date}</span>
         `;
         header.appendChild(headerInner);
         textContent.appendChild(header);
@@ -116,12 +116,12 @@ const Featured = () => {
         title.className = "animate-in";
         const titleInner = document.createElement("h1");
         titleInner.className =
-            "text-6xl lg:text-7xl font-black text-white leading-[0.9] tracking-tight mb-4";
+            "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-3 sm:mb-4";
         titleInner.innerHTML = news.title
             .split(" ")
             .map(
                 (word, i) =>
-                    `<span class="inline-block mr-4 mb-2">${word}</span>`
+                    `<span class="inline-block mr-1 sm:mr-2 mb-1 sm:mb-2">${word}</span>`
             )
             .join("");
         title.appendChild(titleInner);
@@ -130,29 +130,14 @@ const Featured = () => {
         // Subtitle
         const subtitle = document.createElement("div");
         subtitle.className = "animate-in";
-        subtitle.innerHTML = `<h2 class="text-2xl font-light text-white/90 mb-8 tracking-wide">${news.subtitle}</h2>`;
+        subtitle.innerHTML = `<h2 class="text-xl sm:text-2xl font-light text-white/90 mb-4 sm:mb-6 tracking-wide">${news.subtitle}</h2>`;
         textContent.appendChild(subtitle);
 
         // Excerpt
         const excerpt = document.createElement("div");
         excerpt.className = "animate-in";
-        excerpt.innerHTML = `<p class="text-lg text-white/80 leading-relaxed max-w-xl font-light">${news.excerpt}</p>`;
+        excerpt.innerHTML = `<p class="text-base sm:text-lg text-white/80 leading-relaxed max-w-prose font-light">${news.excerpt}</p>`;
         textContent.appendChild(excerpt);
-
-        // Author and Button
-        // const footer = document.createElement("div");
-        // footer.className = "animate-in flex items-center gap-8 pt-4";
-        // footer.innerHTML = `
-        //     <div>
-        //         <p class="text-white font-semibold">${news.author}</p>
-        //         <p class="text-white/60 text-sm font-mono">${news.readTime}</p>
-        //     </div>
-        //     <button class="group bg-white text-black px-8 py-4 font-bold tracking-wider hover:bg-black hover:text-white transition-all duration-500 relative overflow-hidden">
-        //         <span class="relative z-10">EXPLORE</span>
-        //         <div class="absolute inset-0 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-        //     </button>
-        // `;
-        // textContent.appendChild(footer);
 
         grid.appendChild(textContent);
 
@@ -161,10 +146,10 @@ const Featured = () => {
         visual.className = "animate-in hidden lg:block";
         visual.innerHTML = `
             <div class="relative">
-                <div class="w-96 h-96 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                    <div class="w-80 h-80 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                        <div class="w-64 h-64 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                            <div class="text-white text-8xl font-black opacity-20">
+                <div class="w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                    <div class="w-56 sm:w-72 md:w-80 h-56 sm:h-72 md:h-80 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                        <div class="w-48 sm:w-64 md:w-72 h-48 sm:h-64 md:h-72 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                            <div class="text-white text-5xl sm:text-6xl md:text-7xl font-black opacity-20">
                                 ${String(index + 1).padStart(2, "0")}
                             </div>
                         </div>
@@ -183,17 +168,7 @@ const Featured = () => {
 
     // Mouse tracking for parallax effects
     useEffect(() => {
-        interface MousePosition {
-            x: number;
-            y: number;
-        }
-
-        interface MouseMoveEvent extends MouseEvent {
-            clientX: number;
-            clientY: number;
-        }
-
-        const handleMouseMove = (e: MouseMoveEvent) => {
+        const handleMouseMove = (e: MouseEvent) => {
             const { clientX, clientY } = e;
             const { innerWidth, innerHeight } = window;
 
@@ -257,23 +232,19 @@ const Featured = () => {
         const isNext = direction === "next";
         const tl = gsap.timeline({
             onComplete: () => {
-                // Remove old slide
                 if (currentSlide) currentSlide.remove();
-                // Update new slide to be the current one
                 newSlide.setAttribute("data-slide", String(newIndex));
                 setCurrentIndex(newIndex);
                 setIsAnimating(false);
             },
         });
 
-        // Ensure next slide content starts hidden
         gsap.set(newSlide.querySelectorAll(".animate-in"), {
             opacity: 0,
             y: isNext ? 100 : -100,
             rotationX: isNext ? 90 : -90,
         });
 
-        // Animate current slide out
         tl.to(
             currentSlide,
             {
@@ -291,7 +262,6 @@ const Featured = () => {
                     y: isNext ? -100 : 100,
                     opacity: 0,
                     duration: 0.6,
-                    ease: "power3.inOut",
                 },
                 0
             )
@@ -301,28 +271,24 @@ const Featured = () => {
                     scale: 1.2,
                     filter: "blur(10px)",
                     duration: 0.8,
-                    ease: "power3.inOut",
                 },
                 0
-            );
-
-        // Animate new slide in
-        tl.fromTo(
-            newSlide,
-            {
-                opacity: 0,
-                scale: 1.2,
-                rotationY: isNext ? 15 : -15,
-            },
-            {
-                opacity: 1,
-                scale: 1,
-                rotationY: 0,
-                duration: 1,
-                ease: "power3.out",
-            },
-            0.3
-        )
+            )
+            .fromTo(
+                newSlide,
+                {
+                    opacity: 0,
+                    scale: 1.2,
+                    rotationY: isNext ? 15 : -15,
+                },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    rotationY: 0,
+                    duration: 1,
+                },
+                0.3
+            )
             .fromTo(
                 newSlide.querySelector(".bg-image"),
                 { scale: 1.3, filter: "blur(20px)" },
@@ -330,7 +296,6 @@ const Featured = () => {
                     scale: 1,
                     filter: "blur(0px)",
                     duration: 1.2,
-                    ease: "power3.out",
                 },
                 0.3
             )
@@ -342,7 +307,6 @@ const Featured = () => {
                     rotationX: 0,
                     duration: 0.8,
                     stagger: 0.1,
-                    ease: "back.out(1.7)",
                 },
                 0.6
             );
@@ -366,7 +330,6 @@ const Featured = () => {
         }
     };
 
-    // Auto-play
     const startAutoPlay = () => {
         if (autoPlayRef.current) clearInterval(autoPlayRef.current);
         autoPlayRef.current = setInterval(handleNext, 8000);
@@ -379,15 +342,11 @@ const Featured = () => {
         }
     };
 
-    // Initialize first slide
     useEffect(() => {
         if (sliderRef.current) {
-            // Clear any existing content
             sliderRef.current.innerHTML = "";
-            // Create and append the initial slide
             const initialSlide = createSlide(newsData[0], 0);
             sliderRef.current.appendChild(initialSlide);
-            // Ensure initial slide is visible
             gsap.set(initialSlide, { opacity: 1, scale: 1 });
         }
 
@@ -396,8 +355,7 @@ const Featured = () => {
     }, []);
 
     return (
-        <div className="relative w-full h-screen bg-black">
-            {/* Main Slider Container */}
+        <div className="relative w-full h-screen bg-black overflow-hidden">
             <div
                 ref={sliderRef}
                 className="relative w-full h-full"
@@ -405,71 +363,54 @@ const Featured = () => {
                 onMouseLeave={startAutoPlay}
             ></div>
 
-            {/* Navigation */}
-            <div className="absolute bottom-8 left-8 right-8 z-30">
-                <div className="flex justify-between items-end">
-                    {/* Slide Thumbnails */}
-                    <div className="md:flex gap-4 hidden">
-                        {newsData.map((news, index) => (
-                            <button
-                                key={news.id}
-                                onClick={() => handleSlideClick(index)}
-                                disabled={isAnimating}
-                                className={`group relative overflow-hidden transition-all duration-500 ${
-                                    index === currentIndex
-                                        ? "w-32 h-20 opacity-100"
-                                        : "w-20 h-12 opacity-60 hover:opacity-80"
-                                }`}
-                            >
-                                <img
-                                    src={news.image}
-                                    alt={news.title}
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                />
-                                <div className="absolute inset-0 bg-black/50" />
-                                <div className="absolute inset-0 border-2 border-white/20 group-hover:border-white/60 transition-all duration-300" />
-                                {index === currentIndex && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white" />
-                                )}
-                            </button>
-                        ))}
-                    </div>
+            <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 z-30 flex flex-col sm:flex-row justify-between items-end gap-2 sm:gap-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 overflow-x-auto hide-scrollbar">
+                    {newsData.map((news, index) => (
+                        <button
+                            key={news.id}
+                            onClick={() => handleSlideClick(index)}
+                            disabled={isAnimating}
+                            className={`group relative overflow-hidden transition-all duration-500 ${
+                                index === currentIndex
+                                    ? "w-20 sm:w-24 md:w-32 h-12 sm:h-16 md:h-20 opacity-100"
+                                    : "w-16 sm:w-20 md:w-24 h-10 sm:h-12 md:h-16 opacity-60 hover:opacity-80"
+                            } min-w-[64px] sm:min-w-[80px]`}
+                        >
+                            <img
+                                src={news.image}
+                                alt={news.title}
+                                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                            />
+                            <div className="absolute inset-0 bg-black/50" />
+                            <div className="absolute inset-0 border-2 border-white/20 group-hover:border-white/60 transition-all duration-300" />
+                            {index === currentIndex && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white" />
+                            )}
+                        </button>
+                    ))}
+                </div>
 
-                    {/* Controls */}
-                    <div className="flex items-center gap-6">
-                        <button
-                            onClick={handlePrev}
-                            disabled={isAnimating}
-                            className="w-12 h-12 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-50"
-                        >
-                            ←
-                        </button>
-                        <div className="text-white font-mono text-lg">
-                            {String(currentIndex + 1).padStart(2, "0")} /{" "}
-                            {String(newsData.length).padStart(2, "0")}
-                        </div>
-                        <button
-                            onClick={handleNext}
-                            disabled={isAnimating}
-                            className="w-12 h-12 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-50"
-                        >
-                            →
-                        </button>
+                <div className="flex items-center gap-2 sm:gap-4">
+                    <button
+                        onClick={handlePrev}
+                        disabled={isAnimating}
+                        className="w-8 sm:w-10 h-8 sm:h-10 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-50"
+                    >
+                        ←
+                    </button>
+                    <div className="text-white font-mono text-sm sm:text-base">
+                        {String(currentIndex + 1).padStart(2, "0")} /{" "}
+                        {String(newsData.length).padStart(2, "0")}
                     </div>
+                    <button
+                        onClick={handleNext}
+                        disabled={isAnimating}
+                        className="w-8 sm:w-10 h-8 sm:h-10 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-50"
+                    >
+                        →
+                    </button>
                 </div>
             </div>
-
-            <style jsx>{`
-                @keyframes float {
-                    0%,
-                    100% {
-                        transform: translateY(0) rotate(0deg);
-                    }
-                    50% {
-                        transform: translateY(-20px) rotate(180deg);
-                    }
-                }
-            `}</style>
         </div>
     );
 };
