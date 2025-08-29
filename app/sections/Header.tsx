@@ -61,6 +61,23 @@ const Header = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [active]);
 
+    // Function to handle menu item clicks
+    const handleMenuItemClick = (link: string) => {
+        setActive(false); // Close the menu
+
+        // Navigate to the link after a small delay to allow menu to close
+        setTimeout(() => {
+            if (link === "#") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+                const element = document.querySelector(link);
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                }
+            }
+        }, 100);
+    };
+
     return (
         <div className="fixed top-0 left-0 w-full z-[100]">
             {/* Full Navbar - shown at top */}
@@ -72,17 +89,18 @@ const Header = () => {
                 } flex justify-center`}
             >
                 <div className="flex justify-between items-center max-w-6xl w-full mx-auto text-white">
-                    <div className="hidden md:flex items-center justify-around w-full">
+                    <div className="hidden md:flex items-center justify-around w-full capitalize">
                         <a href="#">Home</a>
-                        <a href="#">About</a>
-                        <a href="#">Services</a>
-                        <a href="#">Portfolio</a>
-                        <a href="#">Contact</a>
+                        <a href="#inFocus">In Focus</a>
+                        <a href="#ourStory">Our Story</a>
+                        <a href="#goalsReached">Goals Reached</a>
+                        <a href="#showcase">Showcase</a>
+                        <a href="#fallOfFame">Fall of fame</a>
+                        <a href="#contact">Contact</a>
                     </div>
-
-                    {/* Mobile menu button (always visible on mobile) */}
                 </div>
             </GlassSurface>
+
             <div
                 className={`fixed top-5 right-4 z-[110] transition-all duration-300 ease-in-out ${
                     showButton
@@ -110,34 +128,41 @@ const Header = () => {
                 ))}
             </div>
 
-            {/* Overlay menu */}
-            <div className="fixed top-0 left-0 w-screen h-screen flex flex-col justify-center items-center text-white px-20 py-40 z-[95] pointer-events-none">
-                <div className="menu-title flex justify-center items-center w-full opacity-0">
-                    <p>[Menu]</p>
-                </div>
-
+            {/* Overlay menu - FIXED: Removed pointer-events-none and added proper click handlers */}
+            <div
+                className={`fixed top-0 left-0 w-screen h-screen flex flex-col justify-center items-center text-white px-20 py-40 z-[95] ${
+                    active ? "pointer-events-auto" : "pointer-events-none"
+                }`}
+            >
                 {/* Multiple menu items */}
                 {[
-                    { year: "2024", name: "Home", link: "#home" },
-                    { year: "2024", name: "About", link: "#about" },
-                    { year: "2024", name: "Services", link: "#services" },
-                    { year: "2024", name: "Portfolio", link: "#portfolio" },
-                    { year: "2024", name: "Contact", link: "#contact" },
+                    { year: "2025", name: "Home", link: "#" },
+                    { year: "2025", name: "In Focus", link: "#inFocus" },
+                    { year: "2025", name: "Our Story", link: "#ourStory" },
+                    {
+                        year: "2025",
+                        name: "Goals Reached",
+                        link: "#goalsReached",
+                    },
+                    { year: "2025", name: "Showcase", link: "#showcase" },
+                    { year: "2025", name: "Fall of Fame", link: "#fallOfFame" },
+                    { year: "2025", name: "Contact", link: "#contact" },
                 ].map((item, index) => (
                     <div
                         key={index}
                         className="menu-item flex w-full p-4 cursor-pointer opacity-0 transition duration-300 hover:bg-white/10"
+                        onClick={() => handleMenuItemClick(item.link)}
                     >
                         <div className="flex-1 menu-item-year">
                             <p>{item.year}</p>
                         </div>
                         <div className="flex-3 menu-item-name flex justify-center">
-                            <p className="font-[PP Formula] text-[4vw] text-center">
+                            <p className="font-[PP Formula] text-[3.6vw] text-center">
                                 {item.name}
                             </p>
                         </div>
                         <div className="flex-1 menu-item-link">
-                            <a href={item.link}>[explore]</a>
+                            <span>[explore]</span>
                         </div>
                     </div>
                 ))}

@@ -1,583 +1,579 @@
 "use client";
-import { useEffect, useRef } from "react";
-import * as THREE from "three";
 
-const Achievements = () => {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+import React, { useState, useEffect, useRef } from "react";
+import { gsap } from "gsap";
 
+interface Project {
+    id: number;
+    title: string;
+    client: string;
+    year: string;
+    category: string;
+    description: string;
+    image: string;
+    color: string;
+    accent: string;
+    tech: string[];
+}
+
+interface MouseVelocity {
+    x: number;
+    y: number;
+}
+
+interface MousePosition {
+    x: number;
+    y: number;
+}
+
+export const Achievements = () => {
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const [isAnimating, setIsAnimating] = useState<boolean>(false);
+    const [mouseVelocity, setMouseVelocity] = useState<MouseVelocity>({ x: 0, y: 0 });
+    const [lastMousePos, setLastMousePos] = useState<MousePosition>({ x: 0, y: 0 });
+    const containerRef = useRef<HTMLDivElement>(null);
+    const waveRef = useRef<HTMLDivElement>(null);
+    const autoplayRef = useRef<NodeJS.Timeout | null>(null);
+    const noiseRef = useRef<HTMLDivElement>(null);
+
+    const projects: Project[] = [
+        {
+            id: 1,
+            title: "XBan-24",
+            client: "Meta Reality Labs",
+            year: "2025",
+            category: "XR Interface",
+            description:
+                "XBan is the flagship event of BCCS, bringing together brilliant minds to showcase creativity, technology, and problem-solving skills. From competitions to exhibitions, it's a platform for students to push boundaries, share ideas, and experience the future of tech and innovation.",
+            image: "/xban.jpg",
+            color: "#ff006e",
+            accent: "#8338ec",
+            tech: ["WebXR", "Quantum UI", "Neural Mesh"],
+        },
+        {
+            id: 2,
+            title: "Sync",
+            client: "Tesla Neural",
+            year: "2025",
+            category: "AI Consciousness",
+            description:
+                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory. This photo captures our proud moment, celebrating innovation, teamwork, and excellence in technology.",
+            image: "/sync.jpg",
+            color: "#00f5ff",
+            accent: "#7209b7",
+            tech: ["Neural Networks", "Quantum ML", "Bio-Feedback"],
+        },
+    ];
+
+    // Advanced mouse tracking with velocity
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+        let animationId: number;
 
-        // Create renderer
-        const renderer = new THREE.WebGLRenderer({
-            canvas,
-            antialias: true,
-            preserveDrawingBuffer: true,
-        });
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000000); // Pure black
-        renderer.setClearColor(0x000000, 1.0); // Ensure renderer clear color is also black
-
-        const camera = new THREE.PerspectiveCamera(
-            45,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            100
-        );
-        camera.position.z = 5;
-
-        // Use only ambient light for consistent, even lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
-        scene.add(ambientLight);
-
-        const settings = {
-            wheelSensitivity: 0.008,
-            touchSensitivity: 0.008,
-            momentumMultiplier: 1.0,
-            smoothing: 0.08,
-            slideLerp: 0.1,
-            distortionDecay: 0.98,
-            maxDistortion: 0.5,
-            distortionSensitivity: 0.05,
-            distortionSmoothing: 0.15,
+        const updateMouseVelocity = () => {
+            setMouseVelocity((prev) => ({
+                x: prev.x * 0.8,
+                y: prev.y * 0.8,
+            }));
+            animationId = requestAnimationFrame(updateMouseVelocity);
         };
 
-        const slideWidth = 3.0;
-        const slideHeight = 1.8;
-        const gap = 0.2;
-        const slideCount = 8;
-        const bufferSlides = 3; // Extra slides on each side
-        const totalSlides = slideCount + bufferSlides * 2;
-        const totalWidth = slideCount * (slideWidth + gap);
-        const slideUnit = slideWidth + gap;
+        updateMouseVelocity();
 
-        const slides: THREE.Mesh[] = [];
-        let currentPosition = 0;
-        let targetPosition = 0;
-        let isScrolling = false;
-        let autoScrollSpeed = 0;
-        let lastTime = 0;
-        let touchStartX = 0;
-        let touchLastX = 0;
+        const handleMouseMove = (e: MouseEvent) => {
+            const { clientX, clientY } = e;
 
-        // Mouse drag variables
-        let mouseStartX = 0;
-        let mouseLastX = 0;
-        let isDragging = false;
-
-        let currentDistortionFactor = 0;
-        let targetDistortionFactor = 0;
-        let peakVelocity = 0;
-        const velocityHistory = [0, 0, 0, 0, 0];
-
-        const achievementData = [
-            {
-                title: "First Steps",
-                desc: "Completed first project",
-                color: "#FF6B6B",
-            },
-            {
-                title: "Team Player",
-                desc: "Collaborated on 5 projects",
-                color: "#4ECDC4",
-            },
-            {
-                title: "Innovation",
-                desc: "Implemented new solution",
-                color: "#45B7D1",
-            },
-            {
-                title: "Leadership",
-                desc: "Led successful team",
-                color: "#96CEB4",
-            },
-            { title: "Expert", desc: "Mastered core skills", color: "#FFEAA7" },
-            {
-                title: "Mentor",
-                desc: "Guided 10+ colleagues",
-                color: "#DDA0DD",
-            },
-            {
-                title: "Visionary",
-                desc: "Shaped product direction",
-                color: "#98D8C8",
-            },
-            {
-                title: "Champion",
-                desc: "Achieved excellence",
-                color: "#F7DC6F",
-            },
-        ];
-
-        const createSlide = (index:number, achievementIndex:number) => {
-            const geometry = new THREE.PlaneGeometry(
-                slideWidth,
-                slideHeight,
-                32,
-                18
-            );
-
-            const achievement =
-                achievementData[achievementIndex % achievementData.length];
-
-            // Create gradient material
-            const canvas = document.createElement("canvas");
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-                throw new Error("Failed to get 2D context for achievement slide canvas.");
-            }
-
-            // Create gradient background
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, achievement.color);
-            gradient.addColorStop(1, "#1a1a1a");
-
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Add border
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 4;
-            ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-            // Add title text
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 48px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(
-                achievement.title,
-                canvas.width / 2,
-                canvas.height / 2 - 30
-            );
-
-            // Add description text
-            ctx.font = "32px Arial";
-            ctx.fillText(
-                achievement.desc,
-                canvas.width / 2,
-                canvas.height / 2 + 30
-            );
-
-            // Add achievement number
-            ctx.font = "bold 24px Arial";
-            ctx.fillStyle = "rgba(255,255,255,0.7)";
-            ctx.textAlign = "left";
-            ctx.fillText(`#${achievementIndex + 1}`, 30, 50);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.colorSpace = THREE.SRGBColorSpace;
-
-            const material = new THREE.MeshBasicMaterial({
-                map: texture,
-                side: THREE.DoubleSide,
+            setMouseVelocity({
+                x: (clientX - lastMousePos.x) * 0.1,
+                y: (clientY - lastMousePos.y) * 0.1,
             });
 
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.x = index * slideUnit;
-            mesh.userData = {
-                originalVertices: [...geometry.attributes.position.array],
-                index,
-                achievementIndex,
-                achievement,
-            };
+            setLastMousePos({ x: clientX, y: clientY });
 
-            scene.add(mesh);
-            slides.push(mesh);
-        };
-
-        // Create slides with buffer slides on both ends
-        for (let i = 0; i < totalSlides; i++) {
-            let achievementIndex;
-            if (i < bufferSlides) {
-                // Left buffer - use last slides
-                achievementIndex = (slideCount - bufferSlides + i) % slideCount;
-            } else if (i >= slideCount + bufferSlides) {
-                // Right buffer - use first slides
-                achievementIndex = (i - slideCount - bufferSlides) % slideCount;
-            } else {
-                // Main slides
-                achievementIndex = (i - bufferSlides) % slideCount;
-            }
-            createSlide(i, achievementIndex);
-        }
-
-        // Center slides
-        slides.forEach((slide, i) => {
-            slide.position.x = (i - bufferSlides) * slideUnit - totalWidth / 2;
-            slide.userData.targetX = slide.position.x;
-            slide.userData.currentX = slide.position.x;
-        });
-
-        const updateCurve = (
-            mesh: THREE.Mesh,
-            worldPositionX: number,
-            distortionFactor: number
-        ) => {
-            const distortionCenter = new THREE.Vector2(0, 0);
-            const distortionRadius = 3.0;
-            const maxCurvature = settings.maxDistortion * distortionFactor;
-            const positionAttribute = mesh.geometry.attributes.position as THREE.BufferAttribute;
-            const originalVertices = mesh.userData.originalVertices as number[];
-
-            for (let i = 0; i < positionAttribute.count; i++) {
-            const x = originalVertices[i * 3];
-            const y = originalVertices[i * 3 + 1];
-
-            const vertexWorldPosX = worldPositionX + x;
-            const distFromCenter = Math.sqrt(
-                Math.pow(vertexWorldPosX - distortionCenter.x, 2) +
-                Math.pow(y - distortionCenter.y, 2)
-            );
-
-            const distortionStrength = Math.max(
-                0,
-                1 - distFromCenter / distortionRadius
-            );
-
-            const curveZ = Math.pow(distortionStrength, 2) * maxCurvature;
-
-            positionAttribute.setZ(i, curveZ);
-            }
-            positionAttribute.needsUpdate = true;
-            mesh.geometry.computeVertexNormals();
-        };
-
-        // Smooth distortion interpolation
-        const updateDistortion = () => {
-            currentDistortionFactor +=
-                (targetDistortionFactor - currentDistortionFactor) *
-                settings.distortionSmoothing;
-
-            slides.forEach((slide) => {
-                updateCurve(slide, slide.position.x, currentDistortionFactor);
-            });
-        };
-
-        // Event listeners
-        interface KeyDownEvent extends KeyboardEvent {
-            key: string;
-        }
-
-        const handleKeyDown = (e: KeyDownEvent): void => {
-            if (e.key === "ArrowLeft") {
-            targetPosition += slideUnit;
-            targetDistortionFactor = Math.min(
-                1.0,
-                targetDistortionFactor + 0.3
-            );
-            } else if (e.key === "ArrowRight") {
-            targetPosition -= slideUnit;
-            targetDistortionFactor = Math.min(
-                1.0,
-                targetDistortionFactor + 0.3
-            );
-            }
-        };
-
-        interface WheelEventWithDelta extends WheelEvent {
-            deltaY: number;
-        }
-
-        const handleWheel = (e: WheelEventWithDelta) => {
-            e.preventDefault();
-            const wheelStrength: number = Math.abs(e.deltaY * 0.0005);
-            targetDistortionFactor = Math.min(
-            0.8,
-            targetDistortionFactor + wheelStrength
-            );
-            targetPosition -= e.deltaY * settings.wheelSensitivity;
-            isScrolling = true;
-            autoScrollSpeed =
-            Math.min(Math.abs(e.deltaY) * 0.0002, 0.02) *
-            Math.sign(e.deltaY);
-            if (scrollTimeoutRef.current) {
-            clearTimeout(scrollTimeoutRef.current);
-            }
-            scrollTimeoutRef.current = setTimeout(() => {
-            isScrolling = false;
-            }, 200);
-        };
-
-        interface TouchStartEvent extends TouchEvent {
-            touches: TouchList;
-        }
-
-        const handleTouchStart = (e: TouchStartEvent): void => {
-            touchStartX = e.touches[0].clientX;
-            touchLastX = touchStartX;
-            isScrolling = false;
-        };
-
-        interface TouchMoveEvent extends TouchEvent {
-            touches: TouchList;
-        }
-
-        const handleTouchMove = (e: TouchMoveEvent) => {
-            e.preventDefault();
-            const touchX: number = e.touches[0].clientX;
-            const deltaX: number = touchX - touchLastX;
-            touchLastX = touchX;
-
-            const touchStrength: number = Math.abs(deltaX) * 0.01;
-            targetDistortionFactor = Math.min(
-            0.8,
-            targetDistortionFactor + touchStrength
-            );
-            targetPosition -= deltaX * settings.touchSensitivity;
-        };
-
-        interface TouchEndEvent extends TouchEvent {
-            changedTouches: TouchList;
-        }
-
-        interface TouchEndHandler {
-            (e: TouchEndEvent): void;
-        }
-
-        const handleTouchEnd: TouchEndHandler = (e) => {
-            const velocity: number = (touchLastX - touchStartX) * 0.005;
-            if (Math.abs(velocity) > 0.5) {
-            autoScrollSpeed =
-                -velocity * settings.momentumMultiplier * 0.05;
-            targetDistortionFactor = Math.min(
-                1.0,
-                targetDistortionFactor +
-                Math.abs(velocity) * 3 * settings.distortionSensitivity
-            );
-            isScrolling = true;
-            setTimeout(() => {
-                isScrolling = false;
-            }, 800);
-            }
-        };
-
-        // Mouse drag handlers
-        interface MouseDownEvent extends MouseEvent {
-            clientX: number;
-            preventDefault: () => void;
-        }
-
-        const handleMouseDown = (e: MouseDownEvent): void => {
-            isDragging = true;
-            mouseStartX = e.clientX;
-            mouseLastX = mouseStartX;
-            canvas.style.cursor = "grabbing";
-            e.preventDefault();
-        };
-
-        interface MouseMoveEvent extends MouseEvent {
-            clientX: number;
-        }
-
-        interface HandleMouseMove {
-            (e: MouseMoveEvent): void;
-        }
-
-        const handleMouseMove: HandleMouseMove = (e) => {
-            if (!isDragging) return;
-
-            const mouseX: number = e.clientX;
-            const deltaX: number = mouseX - mouseLastX;
-            mouseLastX = mouseX;
-
-            const dragStrength: number = Math.abs(deltaX) * 0.01;
-            targetDistortionFactor = Math.min(
-            0.8,
-            targetDistortionFactor + dragStrength
-            );
-            targetPosition -= deltaX * settings.touchSensitivity;
-        };
-
-        interface MouseUpEvent extends MouseEvent {
-            clientX: number;
-        }
-
-        interface HandleMouseUp {
-            (e: MouseUpEvent): void;
-        }
-
-        const handleMouseUp: HandleMouseUp = (e) => {
-            if (!isDragging) return;
-
-            isDragging = false;
-            canvas.style.cursor = "grab";
-
-            const velocity = (mouseLastX - mouseStartX) * 0.005;
-            if (Math.abs(velocity) > 0.5) {
-            autoScrollSpeed =
-                -velocity * settings.momentumMultiplier * 0.05;
-            targetDistortionFactor = Math.min(
-                1.0,
-                targetDistortionFactor +
-                Math.abs(velocity) * 3 * settings.distortionSensitivity
-            );
-            isScrolling = true;
-            setTimeout(() => {
-                isScrolling = false;
-            }, 800);
-            }
-        };
-
-        const handleMouseLeave = (e: MouseEvent) => {
-            if (isDragging) {
-                isDragging = false;
-                canvas.style.cursor = "grab";
-            }
-        };
-
-        const handleResize = () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        };
-
-        // Add event listeners
-        window.addEventListener("keydown", handleKeyDown);
-        window.addEventListener("wheel", handleWheel, { passive: false });
-        window.addEventListener("touchstart", handleTouchStart, {
-            passive: false,
-        });
-        window.addEventListener("touchmove", handleTouchMove, {
-            passive: false,
-        });
-        window.addEventListener("touchend", handleTouchEnd);
-        window.addEventListener("resize", handleResize);
-
-        // Mouse drag event listeners
-        canvas.addEventListener("mousedown", handleMouseDown);
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
-        canvas.addEventListener("mouseleave", handleMouseLeave);
-
-        // Set initial cursor style
-        canvas.style.cursor = "grab";
-
-        const animate = (time = 0) => {
-            requestAnimationFrame(animate);
-            const deltaTime = lastTime ? (time - lastTime) / 1000 : 0.016;
-            lastTime = time;
-
-            const prevPos = currentPosition;
-
-            if (isScrolling) {
-                targetPosition += autoScrollSpeed;
-                const speedBasedDecay =
-                    0.97 - Math.min(0.06, Math.abs(autoScrollSpeed) * 0.5);
-                autoScrollSpeed *= Math.max(0.92, speedBasedDecay);
-                if (Math.abs(autoScrollSpeed) < 0.001) autoScrollSpeed = 0;
-            }
-
-            currentPosition +=
-                (targetPosition - currentPosition) * settings.smoothing;
-
-            const currentVelocity =
-                Math.abs(currentPosition - prevPos) / deltaTime;
-            velocityHistory.push(currentVelocity);
-            velocityHistory.shift();
-
-            const avgVelocity =
-                velocityHistory.reduce((a, b) => a + b, 0) /
-                velocityHistory.length;
-
-            if (avgVelocity > peakVelocity) {
-                peakVelocity = avgVelocity;
-            }
-
-            const velocityRatio = avgVelocity / (peakVelocity + 0.001);
-            const isDecelerating = velocityRatio < 0.7 && peakVelocity > 0.8;
-            peakVelocity *= 0.99;
-
-            const movementDistortion = Math.min(1.0, currentVelocity * 0.1);
-            if (currentVelocity > 0.05) {
-                targetDistortionFactor = Math.max(
-                    targetDistortionFactor,
-                    movementDistortion
+            // Distortion effect on elements
+            const distortionElements = document.querySelectorAll(".distort-on-hover");
+            distortionElements.forEach((el) => {
+                const rect = el.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const distance = Math.sqrt(
+                    Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2)
                 );
-            }
+                const maxDistance = 200;
+                const force = Math.max(0, 1 - distance / maxDistance);
 
-            if (isDecelerating || avgVelocity < 0.2) {
-                const decayRate = isDecelerating
-                    ? settings.distortionDecay
-                    : settings.distortionDecay * 0.9;
-                targetDistortionFactor *= decayRate;
-            }
-
-            // Update slide positions without wrapping - use buffer system
-            slides.forEach((slide, i) => {
-                const baseX =
-                    (i - bufferSlides) * slideUnit -
-                    currentPosition -
-                    totalWidth / 2;
-
-                slide.userData.targetX = baseX;
-                slide.userData.currentX +=
-                    (slide.userData.targetX - slide.userData.currentX) *
-                    settings.slideLerp;
-                slide.position.x = slide.userData.currentX;
+                gsap.to(el, {
+                    skewX: (clientX - centerX) * force * 0.01,
+                    skewY: (clientY - centerY) * force * 0.01,
+                    scaleX: 1 + force * 0.05,
+                    scaleY: 1 - force * 0.02,
+                    duration: 0.3,
+                    ease: "power2.out",
+                });
             });
-
-            // Handle infinite scrolling by repositioning when we reach boundaries
-            const maxPosition = totalWidth;
-            const minPosition = 0;
-
-            if (currentPosition > maxPosition) {
-                currentPosition -= totalWidth;
-                targetPosition -= totalWidth;
-            } else if (currentPosition < minPosition - totalWidth) {
-                currentPosition += totalWidth;
-                targetPosition += totalWidth;
-            }
-
-            updateDistortion();
-            renderer.render(scene, camera);
         };
 
-        animate();
+        window.addEventListener("mousemove", handleMouseMove);
 
-        // Cleanup
         return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            window.removeEventListener("wheel", handleWheel);
-            window.removeEventListener("touchstart", handleTouchStart);
-            window.removeEventListener("touchmove", handleTouchMove);
-            window.removeEventListener("touchend", handleTouchEnd);
-            window.removeEventListener("resize", handleResize);
-
-            // Remove mouse drag event listeners
-            canvas.removeEventListener("mousedown", handleMouseDown);
             window.removeEventListener("mousemove", handleMouseMove);
-            if (scrollTimeoutRef.current) {
-                clearTimeout(scrollTimeoutRef.current);
-            }
-            // Removed window.scrollTimeout cleanup as it is not defined or used
-
-            // Clean up Three.js resources
-            slides.forEach((slide: THREE.Mesh) => {
-                scene.remove(slide);
-                (slide.geometry as THREE.BufferGeometry).dispose();
-                const material = slide.material as THREE.Material;
-                material.dispose();
-                if ("map" in material && material.map) {
-                    (material.map as THREE.Texture).dispose();
-                }
-            });
-            renderer.dispose();
+            cancelAnimationFrame(animationId);
         };
+    }, [lastMousePos]);
+
+    // Noise animation
+    useEffect(() => {
+        if (!noiseRef.current) return;
+
+        const animateNoise = () => {
+            gsap.to(noiseRef.current, {
+                opacity: 0.02 + Math.random() * 0.01,
+                duration: 0.1,
+                ease: "none",
+                onComplete: animateNoise,
+            });
+        };
+
+        animateNoise();
     }, []);
 
+    // Wave distortion animation
+    useEffect(() => {
+        if (!waveRef.current) return;
+
+        gsap.to(waveRef.current, {
+            rotation: 360,
+            duration: 20,
+            ease: "none",
+            repeat: -1,
+        });
+    }, []);
+
+    // Experimental slide transition
+    const quantumTransition = (newIndex: number, direction: "next" | "prev" = "next") => {
+        if (isAnimating || newIndex === currentIndex || !containerRef.current) return;
+
+        setIsAnimating(true);
+
+        const currentSlide = containerRef.current.querySelector(
+            `[data-slide="${currentIndex}"]`
+        ) as HTMLElement;
+        const nextSlide = containerRef.current.querySelector(
+            `[data-slide="${newIndex}"]`
+        ) as HTMLElement;
+
+        if (!currentSlide || !nextSlide) {
+            setIsAnimating(false);
+            return;
+        }
+
+        // Master timeline
+        const masterTl = gsap.timeline({
+            onComplete: () => {
+                setCurrentIndex(newIndex);
+                setIsAnimating(false);
+
+                // Reset all slides
+                gsap.set(".slide-panel", {
+                    clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                    filter: "none",
+                    scale: 1,
+                    opacity: (i: number, el: Element) =>
+                        el.getAttribute("data-slide") == newIndex.toString() ? 1 : 0,
+                    zIndex: (i: number, el: Element) =>
+                        el.getAttribute("data-slide") == newIndex.toString() ? 10 : 1,
+                });
+            },
+        });
+
+        // Liquid morphing transition
+        masterTl.to(
+            currentSlide,
+            {
+                clipPath:
+                    direction === "next"
+                        ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)"
+                        : "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)",
+                duration: 1,
+                ease: "power4.inOut",
+            },
+            0.2
+        );
+
+        // Glitch effect
+        masterTl.to(
+            currentSlide,
+            {
+                filter: "hue-rotate(180deg) saturate(200%) contrast(150%)",
+                duration: 0.1,
+                repeat: 5,
+                yoyo: true,
+                ease: "none",
+            },
+            0.5
+        );
+
+        // Next slide entrance with glitch birth
+        gsap.set(nextSlide, {
+            opacity: 1,
+            zIndex: 10,
+            clipPath:
+                direction === "next"
+                    ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)"
+                    : "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)",
+            filter: "brightness(0) contrast(200%)",
+            scale: 1.1,
+        });
+
+        masterTl.to(
+            nextSlide,
+            {
+                clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                filter: "none",
+                scale: 1,
+                duration: 1.2,
+                ease: "power4.out",
+            },
+            0.4
+        );
+
+        // Text emergence with quantum effect
+        const nextTexts = nextSlide.querySelectorAll(".quantum-text");
+        gsap.set(nextTexts, {
+            opacity: 0,
+            y: 100,
+            rotationX: 90,
+            filter: "blur(20px)",
+        });
+
+        masterTl.to(
+            nextTexts,
+            {
+                opacity: 1,
+                y: 0,
+                rotationX: 0,
+                filter: "blur(0px)",
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "back.out(2)",
+            },
+            0.8
+        );
+
+        // Screen distortion wave
+        masterTl
+            .fromTo(
+                ".screen-distortion",
+                {
+                    scaleY: 0,
+                    opacity: 1,
+                },
+                {
+                    scaleY: 1,
+                    duration: 0.6,
+                    ease: "power3.out",
+                },
+                0.2
+            )
+            .to(
+                ".screen-distortion",
+                {
+                    scaleY: 0,
+                    duration: 0.4,
+                    ease: "power3.in",
+                },
+                0.8
+            );
+    };
+
+    const handleNavigation = (direction: "next" | "prev") => {
+        let newIndex: number;
+        if (direction === "next") {
+            newIndex = (currentIndex + 1) % projects.length;
+        } else {
+            newIndex = currentIndex === 0 ? projects.length - 1 : currentIndex - 1;
+        }
+        quantumTransition(newIndex, direction);
+    };
+
+    const handleDotClick = (index: number) => {
+        if (index !== currentIndex && !isAnimating) {
+            const direction: "next" | "prev" = index > currentIndex ? "next" : "prev";
+            quantumTransition(index, direction);
+        }
+    };
+
+    // Auto-advance
+    useEffect(() => {
+        const startAutoplay = () => {
+            autoplayRef.current = setInterval(() => {
+                if (!isAnimating) {
+                    handleNavigation("next");
+                }
+            }, 8000);
+        };
+
+        startAutoplay();
+        return () => {
+            if (autoplayRef.current) {
+                clearInterval(autoplayRef.current);
+            }
+        };
+    }, [currentIndex, isAnimating]);
+
+    // Initialize
+    useEffect(() => {
+        if (containerRef.current) {
+            const slides = containerRef.current.querySelectorAll("[data-slide]");
+            slides.forEach((slide, index) => {
+                if (index === 0) {
+                    gsap.set(slide, { opacity: 1, zIndex: 10 });
+                } else {
+                    gsap.set(slide, { opacity: 0, zIndex: 1 });
+                }
+            });
+        }
+    }, []);
+
+    const currentProject = projects[currentIndex];
+
     return (
-        <section className="relative h-screen w-full flex items-center justify-center bg-black">
-            <canvas ref={canvasRef} className="w-full h-full" />
-        </section>
+        <div
+            ref={containerRef}
+            className="relative w-full h-screen overflow-hidden bg-black"
+        >
+            {/* Noise Texture */}
+            <div
+                ref={noiseRef}
+                className="absolute inset-0 opacity-[0.02] pointer-events-none z-50"
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    mixBlendMode: "overlay",
+                }}
+            />
+
+            {/* Screen Distortion Effect */}
+            <div
+                className="screen-distortion absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 pointer-events-none z-40"
+                style={{ transform: "scaleY(0)", transformOrigin: "center" }}
+            />
+
+            {/* Quantum Wave Background */}
+            <div
+                ref={waveRef}
+                className="absolute inset-0 opacity-5"
+                style={{
+                    background: `conic-gradient(from 0deg at 50% 50%, ${currentProject.color}40, transparent, ${currentProject.accent}40, transparent)`,
+                    filter: "blur(100px)",
+                }}
+            />
+
+            {/* Main Slides Container */}
+            <div className="relative w-full h-full">
+                {projects.map((project, index) => (
+                    <div
+                        key={project.id}
+                        data-slide={index}
+                        className="slide-panel absolute inset-0"
+                    >
+                        {/* Background Image with Advanced Effects */}
+                        <div className="absolute inset-0">
+                            <img
+                                src={project.image}
+                                alt={project.title}
+                                className="w-full h-full object-cover"
+                                style={{
+                                    filter: `hue-rotate(${
+                                        mouseVelocity.x * 2
+                                    }deg) saturate(${
+                                        120 + mouseVelocity.y
+                                    }%) brightness(${
+                                        90 + Math.abs(mouseVelocity.x) * 2
+                                    }%)`,
+                                }}
+                            />
+                            <div
+                                className="absolute inset-0 mix-blend-overlay"
+                                style={{
+                                    background: `linear-gradient(${
+                                        45 + mouseVelocity.x
+                                    }deg, ${project.color}60, transparent, ${
+                                        project.accent
+                                    }60)`,
+                                }}
+                            />
+                            <div className="absolute inset-0 bg-black/50" />
+                        </div>
+
+                        {/* Content Grid */}
+                        <div className="relative z-10 h-full flex items-center">
+                            <div className="w-full max-w-7xl mx-auto px-12 grid grid-cols-12 gap-8 items-center">
+                                {/* Left Content */}
+                                <div className="col-span-6 space-y-12">
+                                    {/* Project Meta */}
+                                    <div className="quantum-text distort-on-hover space-y-4">
+                                        <div className="flex items-center gap-8 text-white/40 font-mono text-sm tracking-[0.3em]">
+                                            <span>{project.year}</span>
+                                            <div className="w-24 h-px bg-gradient-to-r from-white/40 to-transparent" />
+                                            <span>{project.category}</span>
+                                        </div>
+                                        <div className="text-white/60 font-light text-lg tracking-wide">
+                                            {project.client}
+                                        </div>
+                                    </div>
+
+                                    {/* Main Title */}
+                                    <div className="quantum-text">
+                                        <h1 className="text-[clamp(4rem,12vw,8rem)] font-black text-white leading-none tracking-tighter distort-on-hover">
+                                            {project.title
+                                                .split("")
+                                                .map((letter, i) => (
+                                                    <span
+                                                        key={i}
+                                                        className="inline-block transition-all duration-300"
+                                                        style={{
+                                                            transform: `translateY(${
+                                                                Math.sin(
+                                                                    Date.now() *
+                                                                        0.001 +
+                                                                        i
+                                                                ) * 2
+                                                            }px) rotateZ(${
+                                                                mouseVelocity.x *
+                                                                0.1
+                                                            }deg)`,
+                                                            color: `hsl(${
+                                                                (Date.now() *
+                                                                    0.01 +
+                                                                    i * 10) %
+                                                                360
+                                                            }, 70%, 90%)`,
+                                                        }}
+                                                    >
+                                                        {letter}
+                                                    </span>
+                                                ))}
+                                        </h1>
+                                    </div>
+
+                                    {/* Description */}
+                                    <div className="quantum-text distort-on-hover max-w-lg space-y-6">
+                                        <p className="text-xl text-white/80 font-light leading-relaxed">
+                                            {project.description}
+                                        </p>
+
+                                        {/* Tech Stack */}
+                                        <div className="flex flex-wrap gap-3">
+                                            {project.tech.map((tech, i) => (
+                                                <span
+                                                    key={i}
+                                                    className="px-4 py-2 text-xs font-mono text-white/70 border border-white/20 backdrop-blur-sm"
+                                                    style={{
+                                                        background: `linear-gradient(45deg, ${project.color}10, transparent)`,
+                                                    }}
+                                                >
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* CTA */}
+                                    <div className="quantum-text">
+                                        <button className="group distort-on-hover relative flex items-center gap-6 text-white text-lg font-light tracking-wider">
+                                            <div
+                                                className="w-16 h-16 border border-white/30 flex items-center justify-center transition-all duration-500 group-hover:border-white group-hover:scale-110"
+                                                style={{
+                                                    clipPath:
+                                                        "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
+                                                }}
+                                            >
+                                                <div className="w-4 h-4 bg-white transform group-hover:rotate-45 transition-transform duration-300" />
+                                            </div>
+                                            <span className="group-hover:tracking-widest transition-all duration-500">
+                                                EXPLORE PROJECT
+                                            </span>
+                                            <div className="absolute -bottom-1 left-20 w-0 h-px bg-white group-hover:w-32 transition-all duration-500" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Quantum Navigation */}
+            <div className="absolute bottom-12 left-12 z-30 flex items-center gap-8">
+                {projects.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => handleDotClick(index)}
+                        disabled={isAnimating}
+                        className={`relative transition-all duration-500 ${
+                            index === currentIndex ? "w-16 h-1" : "w-8 h-1"
+                        }`}
+                    >
+                        <div
+                            className={`w-full h-full transition-all duration-500 ${
+                                index === currentIndex
+                                    ? "bg-white"
+                                    : "bg-white/20 hover:bg-white/50"
+                            }`}
+                            style={{
+                                background:
+                                    index === currentIndex
+                                        ? `linear-gradient(90deg, ${currentProject.color}, white, ${currentProject.accent})`
+                                        : undefined,
+                                filter:
+                                    index === currentIndex
+                                        ? "blur(0.5px)"
+                                        : "none",
+                            }}
+                        />
+                    </button>
+                ))}
+            </div>
+
+            {/* Advanced Navigation */}
+            <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-30 space-y-8">
+                <button
+                    onClick={() => handleNavigation("prev")}
+                    disabled={isAnimating}
+                    className="distort-on-hover w-20 h-20 border border-white/20 text-white flex items-center justify-center hover:border-white transition-all duration-500 disabled:opacity-30"
+                    style={{
+                        clipPath:
+                            "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
+                    }}
+                >
+                    <div className="transform -rotate-90 text-xl">→</div>
+                </button>
+                <button
+                    onClick={() => handleNavigation("next")}
+                    disabled={isAnimating}
+                    className="distort-on-hover w-20 h-20 border border-white/20 text-white flex items-center justify-center hover:border-white transition-all duration-500 disabled:opacity-30"
+                    style={{
+                        clipPath:
+                            "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
+                    }}
+                >
+                    <div className="transform rotate-90 text-xl">→</div>
+                </button>
+            </div>
+
+            {/* Project Counter */}
+            <div className="absolute top-12 left-12 z-30 font-mono text-white/60">
+                <div className="text-4xl font-black text-white leading-none">
+                    {String(currentIndex + 1).padStart(2, "0")}
+                </div>
+                <div className="text-sm tracking-wider">
+                    — {projects.length} PROJECTS
+                </div>
+            </div>
+
+            {/* Year Display */}
+            <div className="absolute top-12 right-12 z-30 font-mono text-white/40 text-sm tracking-[0.3em]">
+                © {currentProject.year}
+            </div>
+        </div>
     );
 };
-
-export default Achievements;

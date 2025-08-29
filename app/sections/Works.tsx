@@ -9,30 +9,22 @@ gsap.registerPlugin(CustomEase);
 
 const Works = () => {
     useEffect(() => {
-        const totalSlides = 7;
+        const totalSlides = 2;
         let currentSlide = 1;
         let isAnimating = false;
         let scrollAllowed = true;
         let lastScrollTime = 0;
 
+        const images = ["/Sagacious.jpg", "/sync.jpg"];
+
         const slideTitles = [
-            "Field Unit",
-            "Astral Convergence",
-            "Eclipse Core",
-            "Luminous",
-            "Serenity",
-            "Nebula Point",
-            "Horizon",
+            "BCCS Team at Sync 2023",
+            "Showcasing BCCS Talent at Pushpadana",
         ];
 
         const slideDescriptions = [
-            "Concept Art",
-            "Soundscape",
-            "Experimental Film",
-            "Editorial",
-            "Music Video",
-            "VFX",
-            "Set Design",
+            "A glimpse of our talented BCCS members who represented us at Synz, the annual ICT day of Dharmaraja College, Kandy. Together, they showcased skill, creativity, and teamwork that led to our success.",
+            "Our BCCS members proudly participated in the ICT event at Pushpadana Girls’ School, Kandy. This gallery highlights their enthusiasm, collaboration, and innovative spirit during the event.",
         ];
 
         function createSlide(slideNumber: number, direction: string) {
@@ -44,7 +36,7 @@ const Works = () => {
             slideBgImg.className = "slide-bg-img";
 
             const img = document.createElement("img");
-            img.src = `https://picsum.photos/400/600?random=${slideNumber}`;
+            img.src = images[slideNumber - 1];
             slideBgImg.appendChild(img);
             slide.appendChild(slideBgImg);
 
@@ -68,7 +60,7 @@ const Works = () => {
             wrapper.setAttribute("data-wrapper", "new"); // Mark as new for identification
 
             const img = document.createElement("img");
-            img.src = `https://picsum.photos/400/600?random=${slideNumber}`;
+            img.src = images[slideNumber - 1];
             wrapper.appendChild(img);
 
             if (direction === "down") {

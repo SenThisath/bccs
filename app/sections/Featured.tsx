@@ -15,62 +15,26 @@ const Featured = () => {
         {
             id: 1,
             category: "TECHNOLOGY",
-            title: "Neural Networks Reshape Digital Reality",
-            subtitle: "The Dawn of Artificial Consciousness",
+            title: "XBan 2025",
+            subtitle: "Where Innovation Meets Imagination",
             excerpt:
-                "Breakthrough developments in quantum-enhanced AI are creating unprecedented possibilities in human-machine collaboration, fundamentally altering our perception of digital consciousness.",
+                "XBan is the flagship event of BCCS, bringing together brilliant minds to showcase creativity, technology, and problem-solving skills. From competitions to exhibitions, it’s a platform for students to push boundaries, share ideas, and experience the future of tech and innovation.",
             author: "Dr. Sarah Chen",
             date: "2025.08.27",
             readTime: "8 MIN",
-            image: "https://picsum.photos/1200/800?random=1",
+            image: "/xban.jpg",
         },
         {
             id: 2,
             category: "SCIENCE",
-            title: "Quantum Leap in Ocean Conservation",
-            subtitle: "Marine Ecosystem Revolution",
+            title: "Achievement at Sync 2025",
+            subtitle: "Proud Winners at Dharmaraja College",
             excerpt:
-                "Revolutionary bio-engineering techniques are restoring coral reefs at an unprecedented scale, offering new hope for marine biodiversity and climate resilience.",
+                "Our team participated in Synz, the prestigious ICT day at Dharmaraja College, Kandy, and secured a notable victory. This photo captures our proud moment, celebrating innovation, teamwork, and excellence in technology.",
             author: "Prof. Marina Rodriguez",
             date: "2025.08.26",
             readTime: "6 MIN",
-            image: "https://picsum.photos/1200/800?random=2",
-        },
-        {
-            id: 3,
-            category: "SPACE",
-            title: "Mars Colonization Protocol Activated",
-            subtitle: "Humanity's Greatest Journey",
-            excerpt:
-                "Advanced terraforming technologies and sustainable habitat systems mark the beginning of humanity's multi-planetary future, with the first permanent settlement planned for 2027.",
-            author: "Commander Alex Kim",
-            date: "2025.08.25",
-            readTime: "12 MIN",
-            image: "https://picsum.photos/1200/800?random=3",
-        },
-        {
-            id: 4,
-            category: "INNOVATION",
-            title: "Molecular Computing Breakthrough",
-            subtitle: "Beyond Silicon Limitations",
-            excerpt:
-                "Scientists achieve molecular-level computing that operates at room temperature, promising computational power beyond current quantum systems and revolutionary energy efficiency.",
-            author: "Dr. James Wright",
-            date: "2025.08.24",
-            readTime: "10 MIN",
-            image: "https://picsum.photos/1200/800?random=4",
-        },
-        {
-            id: 5,
-            category: "FUTURE",
-            title: "Global Consciousness Network Launch",
-            subtitle: "Connecting Human Minds",
-            excerpt:
-                "Revolutionary brain-computer interfaces enable direct thought sharing and collective problem-solving, ushering in an era of unprecedented human collaboration and creativity.",
-            author: "Dr. Elena Vasquez",
-            date: "2025.08.23",
-            readTime: "15 MIN",
-            image: "https://picsum.photos/1200/800?random=5",
+            image: "algortithm.jpg",
         },
     ];
 
@@ -176,19 +140,19 @@ const Featured = () => {
         textContent.appendChild(excerpt);
 
         // Author and Button
-        const footer = document.createElement("div");
-        footer.className = "animate-in flex items-center gap-8 pt-4";
-        footer.innerHTML = `
-            <div>
-                <p class="text-white font-semibold">${news.author}</p>
-                <p class="text-white/60 text-sm font-mono">${news.readTime}</p>
-            </div>
-            <button class="group bg-white text-black px-8 py-4 font-bold tracking-wider hover:bg-black hover:text-white transition-all duration-500 relative overflow-hidden">
-                <span class="relative z-10">EXPLORE</span>
-                <div class="absolute inset-0 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-            </button>
-        `;
-        textContent.appendChild(footer);
+        // const footer = document.createElement("div");
+        // footer.className = "animate-in flex items-center gap-8 pt-4";
+        // footer.innerHTML = `
+        //     <div>
+        //         <p class="text-white font-semibold">${news.author}</p>
+        //         <p class="text-white/60 text-sm font-mono">${news.readTime}</p>
+        //     </div>
+        //     <button class="group bg-white text-black px-8 py-4 font-bold tracking-wider hover:bg-black hover:text-white transition-all duration-500 relative overflow-hidden">
+        //         <span class="relative z-10">EXPLORE</span>
+        //         <div class="absolute inset-0 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+        //     </button>
+        // `;
+        // textContent.appendChild(footer);
 
         grid.appendChild(textContent);
 
@@ -234,17 +198,17 @@ const Featured = () => {
             const { innerWidth, innerHeight } = window;
 
             setMousePosition({
-            x: (clientX / innerWidth - 0.5) * 2,
-            y: (clientY / innerHeight - 0.5) * 2,
+                x: (clientX / innerWidth - 0.5) * 2,
+                y: (clientY / innerHeight - 0.5) * 2,
             });
 
             if (cursorRef.current) {
-            gsap.to(cursorRef.current, {
-                x: clientX,
-                y: clientY,
-                duration: 0.3,
-                ease: "power2.out",
-            });
+                gsap.to(cursorRef.current, {
+                    x: clientX,
+                    y: clientY,
+                    duration: 0.3,
+                    ease: "power2.out",
+                });
             }
         };
 
@@ -273,7 +237,7 @@ const Featured = () => {
     }, [mousePosition, currentIndex]);
 
     // Animation for slides
-    const animateSlide = (newIndex:number, direction = "next") => {
+    const animateSlide = (newIndex: number, direction = "next") => {
         if (isAnimating || newIndex === currentIndex) return;
 
         setIsAnimating(true);
@@ -395,7 +359,7 @@ const Featured = () => {
         animateSlide(newIndex, "prev");
     };
 
-    const handleSlideClick = (index:number) => {
+    const handleSlideClick = (index: number) => {
         if (index !== currentIndex) {
             const direction = index > currentIndex ? "next" : "prev";
             animateSlide(index, direction);
